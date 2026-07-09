@@ -1,0 +1,31 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "terra-basecamp",
+  "compatibility_date": "2025-04-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./src/server/index.ts",
+  "worker_loaders": [{ "binding": "LOADER" }],
+  "workers_dev": true,
+  "assets": {
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/agents/*"],
+  },
+  "r2_buckets": [
+    { "binding": "TERRA_WEBHOOKS_BUCKET", "bucket_name": "terra-webhooks" },
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "ChatAgent", "class_name": "ChatAgent" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["ChatAgent"] }],
+  // Drives the scheduled() handler in src/server/index.ts (Terra reconcile).
+  "triggers": { "crons": ["0 */6 * * *"] },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "invocation_logs": true,
+    },
+  },
+}
