@@ -1,8 +1,15 @@
 {
   "name": "create-tryterra-app",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Scaffold a Terra example app",
-  "keywords": ["terra", "tryterra", "wearables", "create", "scaffold", "starter"],
+  "keywords": [
+    "terra",
+    "tryterra",
+    "wearables",
+    "create",
+    "scaffold",
+    "starter"
+  ],
   "homepage": "https://github.com/tryterra/terra-examples#readme",
   "bugs": "https://github.com/tryterra/terra-examples/issues",
   "repository": {
@@ -16,7 +23,10 @@
   "bin": {
     "create-tryterra-app": "dist/index.js"
   },
-  "files": ["dist", "templates"],
+  "files": [
+    "dist",
+    "templates"
+  ],
   "engines": {
     "node": ">=20"
   },
