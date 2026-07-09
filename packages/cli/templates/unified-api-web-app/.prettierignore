@@ -1,0 +1,10 @@
+dist/
+node_modules/
+.wrangler/
+.tanstack/
+infra/node_modules/
+infra/sdks/
+db/migrations/
+*.tsbuildinfo
+src/client/routeTree.gen.ts
+package-lock.json
