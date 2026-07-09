@@ -1,0 +1,42 @@
+{
+  "name": "create-tryterra-app",
+  "version": "0.1.0",
+  "description": "Scaffold a Terra example app",
+  "keywords": ["terra", "tryterra", "wearables", "create", "scaffold", "starter"],
+  "homepage": "https://github.com/tryterra/terra-examples#readme",
+  "bugs": "https://github.com/tryterra/terra-examples/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tryterra/terra-examples.git",
+    "directory": "packages/cli"
+  },
+  "author": "Terra",
+  "license": "Apache-2.0",
+  "type": "module",
+  "bin": {
+    "create-tryterra-app": "dist/index.js"
+  },
+  "files": ["dist", "templates"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsup src/index.ts --format esm --clean",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.0.1",
+    "figlet": "^1.8.0",
+    "picocolors": "^1.1.1",
+    "validate-npm-package-name": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/figlet": "^1.7.0",
+    "@types/node": "^22.15.30",
+    "@types/validate-npm-package-name": "^4.0.2",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
