@@ -51,6 +51,14 @@ export function templateExists(name: string): boolean {
   return existsSync(join(templatesDir, name));
 }
 
+/** Every template paired with its description — the payload for `--list`. */
+export function describeTemplates(): { name: string; description?: string }[] {
+  return listTemplates().map((name) => ({
+    name,
+    description: templateDescription(name),
+  }));
+}
+
 /** Coerces a directory name into a valid, lowercase npm package name. */
 export function toPackageName(input: string): string {
   return (

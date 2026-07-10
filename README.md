@@ -50,13 +50,29 @@ npm run dev     # start the dev server
 Use any package manager — `npm`, `pnpm create tryterra-app`, `yarn create tryterra-app`,
 or `bun create tryterra-app`. The CLI installs dependencies with whichever you invoke.
 
-## Non-interactive
+## Using with AI coding agents
 
-Pass a directory and an example to skip the prompts:
+The CLI is fully non-interactive and self-documenting, so a coding agent can drive
+it end to end. Discover examples, then scaffold with machine-readable output:
 
 ```bash
-npx create-tryterra-app@latest my-app --template unified-api-web-app
+# List examples as JSON
+npx --yes create-tryterra-app@latest --list --json
+
+# Scaffold non-interactively: JSON result on stdout, logs on stderr
+npx --yes create-tryterra-app@latest my-app --template unified-api-web-app --yes --json
 ```
+
+`--yes` skips every prompt, `--json` keeps stdout a clean JSON channel, and exit
+codes (`0` ok · `1` usage · `2` execution) tell the agent what happened. The
+leading `npx --yes` accepts npx's own install prompt. See [AGENTS.md](./AGENTS.md)
+for the full workflow, JSON shape, and deploy steps.
+
+**Example prompt to give an agent:**
+
+> Scaffold the Terra Basecamp example into `./my-terra-app` and get it running.
+> Run `npx --yes create-tryterra-app@latest my-terra-app --template unified-api-web-app --yes --json`,
+> parse the JSON result, then follow `AGENTS.md` to populate `.env` and run `npm run setup`.
 
 Full CLI options live in [packages/cli](./packages/cli/README.md). Requires Node.js 20+.
 

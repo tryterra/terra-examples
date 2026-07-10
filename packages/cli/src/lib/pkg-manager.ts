@@ -1,5 +1,18 @@
 export type PackageManager = "npm" | "pnpm" | "yarn" | "bun";
 
+/** The package managers a `--package-manager` override may name. */
+export const PACKAGE_MANAGERS: readonly PackageManager[] = [
+  "npm",
+  "pnpm",
+  "yarn",
+  "bun",
+];
+
+/** Narrows an arbitrary string to a supported package manager. */
+export function isPackageManager(value: string): value is PackageManager {
+  return (PACKAGE_MANAGERS as readonly string[]).includes(value);
+}
+
 /**
  * Detects the package manager that invoked this CLI, from the
  * `npm_config_user_agent` env var that npm/pnpm/yarn/bun all set. Defaults to
