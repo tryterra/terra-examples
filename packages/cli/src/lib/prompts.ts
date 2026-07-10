@@ -1,17 +1,18 @@
-import { cancel, confirm, group, isCancel, select, text } from "@clack/prompts";
+import { confirm, group, isCancel, select, text } from "@clack/prompts";
 import { basename, resolve } from "node:path";
 import validateNpmName from "validate-npm-package-name";
 import { isEmptyDir, templateDescription } from "./copy.js";
+import { EXIT, getReporter } from "./output.js";
 
-export function bail(msg: string): never {
-  cancel(msg);
-  process.exit(1);
+/** Prints an error (honoring json mode) and exits — usage error by default. */
+export function bail(msg: string, code: number = EXIT.USAGE): never {
+  getReporter().error(msg);
+  process.exit(code);
 }
 
 /** Shared cancel handler for @clack prompts and prompt groups. */
 function onCancel(): never {
-  cancel("Operation cancelled.");
-  process.exit(1);
+  bail("Operation cancelled.");
 }
 
 /** `health-fitness-web-app` → `Health Fitness Web App` */
@@ -50,6 +51,8 @@ export interface TargetOptions {
   /** `--template` flag value, if passed (already validated by the caller). */
   templateFlag?: string;
   templates: string[];
+  /** `--force`: allow scaffolding into a non-empty directory. */
+  force: boolean;
 }
 
 export interface Target {
@@ -64,17 +67,21 @@ export interface Target {
  * the CLI flags without prompting.
  */
 export async function resolveTarget(opts: TargetOptions): Promise<Target> {
-  const { interactive, nameArg, templateFlag, templates } = opts;
+  const { interactive, nameArg, templateFlag, templates, force } = opts;
 
   if (!interactive) {
-    if (!nameArg) bail("Provide a target directory.");
+    if (!nameArg) {
+      bail("Provide a target directory (positional argument), e.g. `my-app`.");
+    }
     const template =
       templateFlag ?? (templates.length === 1 ? templates[0] : undefined);
     if (!template) {
       bail(`Pass --template <name>. Available: ${templates.join(", ")}`);
     }
-    if (!isEmptyDir(resolve(process.cwd(), nameArg))) {
-      bail(`Directory "${nameArg}" already exists and is not empty.`);
+    if (!force && !isEmptyDir(resolve(process.cwd(), nameArg))) {
+      bail(
+        `Directory "${nameArg}" already exists and is not empty. Pass --force to scaffold into it anyway.`,
+      );
     }
     return { targetName: nameArg, template };
   }
@@ -105,7 +112,7 @@ export async function resolveTarget(opts: TargetOptions): Promise<Target> {
             }),
       overwrite: ({ results }) => {
         const dir = resolve(process.cwd(), results.name as string);
-        return isEmptyDir(dir)
+        return force || isEmptyDir(dir)
           ? Promise.resolve(true)
           : confirm({
               message: `Directory "${results.name}" is not empty. Continue anyway?`,
