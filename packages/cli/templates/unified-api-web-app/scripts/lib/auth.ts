@@ -1,4 +1,4 @@
-import { isCancel, log, select, spinner } from "@clack/prompts";
+import { isCancel, select } from "@clack/prompts";
 import {
   bail,
   commandSucceeds,
@@ -7,9 +7,8 @@ import {
   updateEnvValue,
   type Env,
 } from "./helpers";
+import { getReporter, isInteractive } from "./output";
 import { suppressSkillsPrompt } from "./wrangler";
-
-const interactive = Boolean(process.stdin.isTTY);
 
 type Account = { name: string; id: string };
 
@@ -37,7 +36,7 @@ async function chooseAccount(env: Env, accounts: Account[]): Promise<void> {
     return;
   }
   if (accounts.length <= 1) return; // wrangler auto-selects a lone account
-  if (!interactive)
+  if (!isInteractive())
     bail(
       `Multiple Cloudflare accounts — set CLOUDFLARE_ACCOUNT_ID to one of: ${accounts.map((a) => a.id).join(", ")}`,
     );
@@ -63,7 +62,7 @@ export async function ensureCloudflareAuth(env: Env): Promise<void> {
   }
   suppressSkillsPrompt();
 
-  const s = spinner();
+  const s = getReporter().task();
   s.start("Checking Cloudflare sign-in");
   let accounts = await cloudflareAccounts();
   s.stop(
@@ -71,11 +70,11 @@ export async function ensureCloudflareAuth(env: Env): Promise<void> {
   );
 
   if (!accounts.length) {
-    if (!interactive)
+    if (!isInteractive())
       bail(
         "Not signed in to Cloudflare. Set CLOUDFLARE_API_TOKEN or run `npx wrangler login`.",
       );
-    log.step("Signing in to Cloudflare (opens your browser)…");
+    getReporter().step("Signing in to Cloudflare (opens your browser)…");
     runVisible("npx wrangler login");
     accounts = await cloudflareAccounts();
   }
@@ -88,17 +87,17 @@ export async function ensureNeonAuth(env: Env): Promise<void> {
     process.env.NEON_API_KEY = env.NEON_API_KEY;
     return;
   }
-  const s = spinner();
+  const s = getReporter().task();
   s.start("Checking Neon sign-in");
   const signedIn = await commandSucceeds("npx neonctl me");
   s.stop(signedIn ? "Signed in to Neon" : "Neon sign-in needed");
 
   if (!signedIn) {
-    if (!interactive)
+    if (!isInteractive())
       bail(
         "Not signed in to Neon. Set NEON_API_KEY or run `npx neonctl auth`.",
       );
-    log.step("Signing in to Neon (opens your browser)…");
+    getReporter().step("Signing in to Neon (opens your browser)…");
     runVisible("npx neonctl auth");
   }
 }

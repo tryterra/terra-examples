@@ -1,4 +1,3 @@
-import { log } from "@clack/prompts";
 import {
   existsSync,
   mkdirSync,
@@ -9,6 +8,7 @@ import {
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { errorMessage, runCapture, runVisible } from "./helpers";
+import { getReporter } from "./output";
 
 const WORKERS_DEV_URL = /https:\/\/[^\s]+\.workers\.dev/;
 const WRANGLER_CONFIG = "wrangler.jsonc";
@@ -114,7 +114,7 @@ export function deployWorker(): string {
     }
     throw new Error(errorBlock(captured));
   }
-  process.stdout.write(out + "\n");
+  getReporter().passthrough(out + "\n");
   return out.match(WORKERS_DEV_URL)?.[0] ?? "";
 }
 
@@ -123,7 +123,7 @@ export function deleteWorker(name: string): void {
   try {
     runVisible(`npx wrangler delete ${name} --force`);
   } catch (e) {
-    log.warn(`Could not delete Worker "${name}": ${errorMessage(e)}`);
+    getReporter().warn(`Could not delete Worker "${name}": ${errorMessage(e)}`);
   }
 }
 
@@ -131,9 +131,9 @@ export function deleteWorker(name: string): void {
 export function deleteR2Bucket(name: string): void {
   try {
     runCapture(`npx wrangler r2 bucket delete ${name} 2>&1`);
-    log.success(`Deleted R2 bucket "${name}"`);
+    getReporter().success(`Deleted R2 bucket "${name}"`);
   } catch (e) {
-    log.warn(
+    getReporter().warn(
       `Could not delete R2 bucket "${name}" (empty it first): ${errorMessage(e)}`,
     );
   }

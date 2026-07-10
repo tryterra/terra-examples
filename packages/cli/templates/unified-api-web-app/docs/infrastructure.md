@@ -15,6 +15,17 @@ Both providers use a browser OAuth login, with an env-var fallback for headless/
 
 See `scripts/lib/auth.ts`.
 
+## Non-interactive & machine-readable output
+
+Every script (`setup`, `deploy`, `setup:reset`, `db:migrate:prod`) is flag-driven
+and self-documenting — run `-- --help` for the flags. `--yes` forces
+non-interactive mode (also implied by `--json`, a non-TTY pipe, or CI); `--json`
+emits one result object on stdout with all logs on stderr. Exit codes are `0`
+success, `1` usage/missing credentials, `2` execution failure. The shared
+plumbing lives in `scripts/lib/output.ts` (reporter + exit codes) and
+`scripts/lib/args.ts` (flag parsing). See [AGENTS.md](../AGENTS.md) for the agent
+workflow and JSON shapes.
+
 ## Resources
 
 ### Neon Postgres (`scripts/lib/neon.ts`)

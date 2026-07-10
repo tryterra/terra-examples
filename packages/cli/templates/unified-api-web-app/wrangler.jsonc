@@ -4,7 +4,6 @@
   "compatibility_date": "2025-04-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/server/index.ts",
-  "worker_loaders": [{ "binding": "LOADER" }],
   "workers_dev": true,
   "assets": {
     "not_found_handling": "single-page-application",

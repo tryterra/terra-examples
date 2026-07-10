@@ -1,8 +1,8 @@
-import { cancel } from "@clack/prompts";
 import { exec, execSync, type ExecSyncOptions } from "node:child_process";
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { promisify } from "node:util";
 import type { z } from "zod";
+import { EXIT, getReporter } from "./output";
 
 const execAsync = promisify(exec);
 
@@ -20,9 +20,25 @@ export function runQuiet(cmd: string, opts: ExecSyncOptions = {}): void {
   execSync(cmd, { encoding: "utf-8", stdio: "pipe", ...opts });
 }
 
-/** Runs a command with inherited stdio so its output streams to the user. */
+/** Writes a failed command's captured output to stderr (json-mode diagnostics). */
+export function surfaceChildError(e: unknown): void {
+  const err = e as { stdout?: Buffer | string; stderr?: Buffer | string };
+  const out = `${err.stdout ?? ""}${err.stderr ?? ""}`.trim();
+  if (out) process.stderr.write(out + "\n");
+}
+
+/** Streams a command's output live (human) or captures it and shows it only on failure (json). */
 export function runVisible(cmd: string, opts: ExecSyncOptions = {}): void {
-  execSync(cmd, { encoding: "utf-8", stdio: "inherit", ...opts });
+  if (!getReporter().json) {
+    execSync(cmd, { encoding: "utf-8", stdio: "inherit", ...opts });
+    return;
+  }
+  try {
+    execSync(cmd, { encoding: "utf-8", stdio: "pipe", ...opts });
+  } catch (e) {
+    surfaceChildError(e);
+    throw e;
+  }
 }
 
 /** Runs a command that emits JSON on stdout and parses the result. */
@@ -49,10 +65,10 @@ export async function commandSucceeds(cmd: string): Promise<boolean> {
   }
 }
 
-/** Prints a cancellation message and exits with a non-zero code. */
-export function bail(msg: string): never {
-  cancel(msg);
-  process.exit(1);
+/** Prints an error (honoring json mode) and exits — usage error by default. */
+export function bail(msg: string, code: number = EXIT.USAGE): never {
+  getReporter().error(msg);
+  process.exit(code);
 }
 
 /** Extracts a human-readable message from an unknown thrown value. */
