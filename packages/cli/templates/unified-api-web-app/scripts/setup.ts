@@ -1,16 +1,8 @@
-import {
-  confirm,
-  intro,
-  isCancel,
-  log,
-  outro,
-  password,
-  spinner,
-  text,
-} from "@clack/prompts";
+import { confirm, isCancel, password, text } from "@clack/prompts";
 import { execSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import pc from "picocolors";
+import { initScript } from "./lib/args";
 import { ensureCloudflareAuth, ensureNeonAuth } from "./lib/auth";
 import {
   GROUPS,
@@ -24,10 +16,12 @@ import {
   errorMessage,
   loadEnv,
   runVisible,
+  surfaceChildError,
   updateEnvValue,
   type Env,
 } from "./lib/helpers";
 import { provisionNeon } from "./lib/neon";
+import { EXIT } from "./lib/output";
 import {
   deployWorker,
   ensureR2Bucket,
@@ -38,9 +32,53 @@ import {
   setWorkerName,
 } from "./lib/wrangler";
 
-/* ----------------------------- Credential wizard -------------------------- */
+/* -------------------------------- CLI flags ------------------------------- */
 
-const interactive = Boolean(process.stdin.isTTY);
+const HELP = `
+  npm run setup — provision services and deploy Terra Basecamp
+
+  Usage
+    npm run setup -- [options]
+
+  Options
+    --app-name <name>   Name the Worker + Neon project (env: APP_NAME)
+    --ai, --no-ai       Turn the AI assistant on/off (skips the prompt). Off by
+                        default; --ai needs ANTHROPIC_API_KEY + the Workers Paid plan.
+    --free-plan         On a paid-plan error, drop AI and redeploy free (env: SETUP_FREE_PLAN)
+    --yes, -y           Non-interactive: use env/.env, never prompt
+    --json              Machine-readable result on stdout, logs on stderr
+    -h, --help          Show this help
+    -v, --version       Show version
+
+  Non-interactive setup reads credentials from .env / the environment. See
+  AGENTS.md for the full agent workflow, JSON shape, and exit codes.
+
+  Exit codes
+    0  success
+    1  usage / missing credentials
+    2  execution failure (build / migrate / deploy)
+`;
+
+const { flags, reporter, interactive } = initScript(HELP, {
+  "app-name": { type: "string" },
+  ai: { type: "boolean" },
+  "no-ai": { type: "boolean" },
+  "free-plan": { type: "boolean" },
+});
+
+if (flags.ai && flags["no-ai"]) {
+  bail("--ai and --no-ai are mutually exclusive.");
+}
+/** Explicit AI choice from flags, or `undefined` to fall back to the default. */
+const aiFlag: boolean | undefined = flags["no-ai"]
+  ? false
+  : flags.ai
+    ? true
+    : undefined;
+const freePlan =
+  Boolean(flags["free-plan"]) || process.env.SETUP_FREE_PLAN === "1";
+
+/* ----------------------------- Credential wizard -------------------------- */
 
 /** .env flag remembering that an optional group was deliberately skipped. */
 function skipKeyFor(group: Group): string {
@@ -79,7 +117,7 @@ function skipGroup(env: Env, group: Group): void {
   }
   env[skipKeyFor(group)] = "true";
   updateEnvValue(".env", skipKeyFor(group), "true");
-  log.info(`Skipped ${group.name} — ${group.skipNote}`);
+  reporter.info(`Skipped ${group.name} — ${group.skipNote}`);
 }
 
 /** Runs a group's validator, treating network failures as validation failures. */
@@ -136,7 +174,7 @@ async function runWizard(env: Env): Promise<void> {
       }
       if (skipped) break;
 
-      const s = spinner();
+      const s = reporter.task();
       s.start(`Validating ${group.name} credentials`);
       const result = await validateGroup(env, group);
       if (result.ok) {
@@ -145,7 +183,7 @@ async function runWizard(env: Env): Promise<void> {
       }
       s.stop(`${group.name} validation failed`);
       if (!interactive) bail(result.message);
-      log.error(result.message);
+      reporter.error(result.message);
       // Clear only in memory: .env keeps the old values until new answers land
       for (const field of group.fields) env[field.key] = "";
     }
@@ -156,11 +194,18 @@ async function runWizard(env: Env): Promise<void> {
 
 const APP_NAME_RE = /^[a-z0-9][a-z0-9-]{0,53}$/;
 
-/** Prompts for the app name (Worker + Neon project); syncs .env + wrangler.jsonc. */
+/** Resolves the app name (--app-name / APP_NAME / prompt); syncs .env + wrangler.jsonc. */
 async function resolveAppName(env: Env): Promise<void> {
-  const current = env.APP_NAME || getWorkerName();
+  const flagName = flags["app-name"] as string | undefined;
+  if (flagName && !APP_NAME_RE.test(flagName.trim())) {
+    bail(
+      "Invalid --app-name. Use lowercase letters, numbers, and hyphens (max 54 chars).",
+    );
+  }
+
+  const current = flagName?.trim() || env.APP_NAME || getWorkerName();
   let name = current;
-  if (interactive) {
+  if (interactive && !flagName) {
     const answer = await text({
       message: "What should we call your app? (names the Worker + database)",
       placeholder: current,
@@ -187,10 +232,16 @@ function setAi(env: Env, key: string): void {
   setWorkerLoaders(Boolean(key));
 }
 
-/** AI opt-in: a key enables chat + the analyze tool (needs the paid plan). */
+/** AI opt-in: enables chat + the analyze tool (needs a key + the paid plan). */
 async function resolveAiAssistant(env: Env): Promise<void> {
   if (!interactive) {
-    setWorkerLoaders(Boolean(env.ANTHROPIC_API_KEY));
+    // A paid feature must be an explicit --ai, not inferred from a stray key.
+    const enable = aiFlag === true;
+    if (enable && !env.ANTHROPIC_API_KEY) {
+      bail("--ai requires ANTHROPIC_API_KEY. Set it in .env, or drop --ai.");
+    }
+    setWorkerLoaders(enable);
+    if (!enable) env.ANTHROPIC_API_KEY = ""; // don't ship the key; leave .env as-is
     return;
   }
 
@@ -198,13 +249,13 @@ async function resolveAiAssistant(env: Env): Promise<void> {
     message:
       "Enable the AI assistant (chat + data analysis)? " +
       "Needs an Anthropic API key and the Cloudflare Workers Paid plan ($5/mo).",
-    initialValue: hasWorkerLoaders(),
+    initialValue: aiFlag ?? hasWorkerLoaders(),
   });
   if (isCancel(enable)) bail("Setup cancelled.");
 
   if (!enable) {
     setAi(env, "");
-    log.info("AI assistant off — deploying on the free plan.");
+    reporter.info("AI assistant off — deploying on the free plan.");
     return;
   }
 
@@ -224,27 +275,30 @@ async function resolveAiAssistant(env: Env): Promise<void> {
 
 /** Generates migrations, then applies them to the dev and prod branches. */
 function runMigrations(prodDatabaseUrl: string): void {
-  log.step("Generating database migrations...");
+  reporter.step("Generating database migrations...");
   try {
     runVisible("npx drizzle-kit generate");
   } catch {
-    bail("Migration generation failed. Check the errors above.");
+    bail("Migration generation failed. Check the errors above.", EXIT.RUNTIME);
   }
 
-  log.step("Applying migrations to dev branch...");
+  reporter.step("Applying migrations to dev branch...");
   try {
     runVisible("npx drizzle-kit migrate");
   } catch {
-    bail("Dev branch migration failed. Check the errors above.");
+    bail("Dev branch migration failed. Check the errors above.", EXIT.RUNTIME);
   }
 
-  log.step("Applying migrations to production branch...");
+  reporter.step("Applying migrations to production branch...");
   try {
     runVisible("npx drizzle-kit migrate", {
       env: { ...process.env, DATABASE_URL: prodDatabaseUrl },
     });
   } catch {
-    bail("Production branch migration failed. Check the errors above.");
+    bail(
+      "Production branch migration failed. Check the errors above.",
+      EXIT.RUNTIME,
+    );
   }
 }
 
@@ -252,7 +306,7 @@ function runMigrations(prodDatabaseUrl: string): void {
 /*                                    Main                                    */
 /* -------------------------------------------------------------------------- */
 
-intro(pc.bgCyan(pc.black(pc.bold(" Terra Basecamp – Setup "))));
+reporter.intro(pc.bgCyan(pc.black(pc.bold(" Terra Basecamp – Setup "))));
 
 /** Formats one "What you'll need" row: cyan name, coloured tag, description. */
 const row = (
@@ -262,48 +316,48 @@ const row = (
   desc: string,
 ) => `  ${pc.cyan(name.padEnd(14))}${color(tag.padEnd(10))}${desc}`;
 
-log.message(
-  [
-    pc.bold("What this does"),
-    "",
-    "Signs you in to Cloudflare and Neon, provisions your database, deploys\n" +
-      "the Worker, runs migrations, and hands you a live URL.",
-    "",
-    pc.bold("What you'll need"),
-    "",
-    row("Cloudflare", "login", pc.green, "hosts the Worker"),
-    row("Neon", "login", pc.green, "Postgres database (dev + prod branches)"),
-    row(
-      "Terra API",
-      "keys",
-      pc.green,
-      "the health data integrations this app is built on",
-    ),
-    row(
-      "Anthropic",
-      "optional",
-      pc.yellow,
-      "powers the AI assistant (chat + analysis)",
-    ),
-    row("SendGrid", "optional", pc.yellow, "emails login OTP codes"),
-    "",
-    pc.gray("│ Heads up: the AI assistant also needs the Workers Paid plan"),
-    pc.gray("│ ($5/mo). Decline it during setup to stay on the free plan."),
-    "",
-    "Cloudflare and Neon open a browser to sign in (or set CLOUDFLARE_API_TOKEN\n" +
-      "/ NEON_API_KEY to skip). You'll only be prompted for what's missing.",
-  ].join("\n"),
-);
+// The overview + "Press Enter" gate are onboarding for humans; agents read AGENTS.md.
+if (interactive) {
+  reporter.message(
+    [
+      pc.bold("What this does"),
+      "",
+      "Signs you in to Cloudflare and Neon, provisions your database, deploys\n" +
+        "the Worker, runs migrations, and hands you a live URL.",
+      "",
+      pc.bold("What you'll need"),
+      "",
+      row("Cloudflare", "login", pc.green, "hosts the Worker"),
+      row("Neon", "login", pc.green, "Postgres database (dev + prod branches)"),
+      row(
+        "Terra API",
+        "keys",
+        pc.green,
+        "the health data integrations this app is built on",
+      ),
+      row(
+        "Anthropic",
+        "optional",
+        pc.yellow,
+        "powers the AI assistant (chat + analysis)",
+      ),
+      row("SendGrid", "optional", pc.yellow, "emails login OTP codes"),
+      "",
+      pc.gray("│ Heads up: the AI assistant also needs the Workers Paid plan"),
+      pc.gray("│ ($5/mo). Decline it during setup to stay on the free plan."),
+      "",
+      "Cloudflare and Neon open a browser to sign in (or set CLOUDFLARE_API_TOKEN\n" +
+        "/ NEON_API_KEY to skip). You'll only be prompted for what's missing.",
+    ].join("\n"),
+  );
+
+  const go = await text({ message: "Press Enter to begin" });
+  if (isCancel(go)) bail("Setup cancelled.");
+}
 
 /* -------------------------------- App name -------------------------------- */
 
 const env = loadEnv();
-
-// Let the reader take in the overview before the questions begin.
-if (interactive) {
-  const go = await text({ message: "Press Enter to begin" });
-  if (isCancel(go)) bail("Setup cancelled.");
-}
 
 await resolveAppName(env);
 
@@ -320,35 +374,38 @@ await resolveAiAssistant(env);
 if (!env.BETTER_AUTH_SECRET) {
   env.BETTER_AUTH_SECRET = randomBytes(32).toString("hex");
   updateEnvValue(".env", "BETTER_AUTH_SECRET", env.BETTER_AUTH_SECRET);
-  log.success("Generated BETTER_AUTH_SECRET");
+  reporter.success("Generated BETTER_AUTH_SECRET");
 }
 
 /* ---------------------------- Provision Neon ------------------------------ */
 
 const neon = await provisionNeon(env);
 updateEnvValue(".env", "DATABASE_URL", neon.devDatabaseUrl);
-log.success(".env updated with DATABASE_URL (dev branch)");
+reporter.success(".env updated with DATABASE_URL (dev branch)");
 
 /* ------------------------------- R2 bucket -------------------------------- */
 
-const r2Spinner = spinner();
-r2Spinner.start("Ensuring R2 bucket (terra-webhooks)");
+const r2Task = reporter.task();
+r2Task.start("Ensuring R2 bucket (terra-webhooks)");
 try {
   ensureR2Bucket("terra-webhooks");
-  r2Spinner.stop("R2 bucket ready (terra-webhooks)");
+  r2Task.stop("R2 bucket ready (terra-webhooks)");
 } catch (e) {
-  r2Spinner.stop("R2 setup failed");
-  bail(errorMessage(e) + "\n  Fix the issue above and re-run: npm run setup");
+  r2Task.stop("R2 setup failed");
+  bail(
+    errorMessage(e) + "\n  Fix the issue above and re-run: npm run setup",
+    EXIT.RUNTIME,
+  );
 }
 
 /* --------------------------------- Build ---------------------------------- */
 
-log.step("Building the app (vite build)...");
+reporter.step("Building the app (vite build)...");
 try {
   runVisible("npx vite build");
-  log.success("App built");
+  reporter.success("App built");
 } catch {
-  bail("Vite build failed. Check the errors above.");
+  bail("Vite build failed. Check the errors above.", EXIT.RUNTIME);
 }
 
 /* ------------------------------- Migrations ------------------------------- */
@@ -357,15 +414,18 @@ runMigrations(neon.prodDatabaseUrl);
 
 /* --------------------------------- Deploy --------------------------------- */
 
-log.step("Deploying the Worker...");
+reporter.step("Deploying the Worker...");
 let workerUrl: string;
 try {
   workerUrl = deployWorker();
-  log.success("Worker deployed");
+  reporter.success("Worker deployed");
 } catch (e) {
-  // The AI assistant needs the paid plan — offer to drop it and deploy free.
-  if (e instanceof PaidPlanError && interactive) {
-    log.warn(errorMessage(e));
+  // Paid-plan wall: drop AI and redeploy free if allowed (ask, or --free-plan).
+  if (!(e instanceof PaidPlanError) || (!interactive && !freePlan)) {
+    bail(`Couldn't deploy the Worker:\n\n${errorMessage(e)}`, EXIT.RUNTIME);
+  }
+  reporter.warn(errorMessage(e));
+  if (interactive) {
     const goFree = await confirm({
       message: "Disable the AI assistant and deploy on the free plan?",
       initialValue: true,
@@ -373,22 +433,20 @@ try {
     if (isCancel(goFree) || !goFree) {
       bail("Upgrade to the Workers Paid plan, then re-run: npm run setup");
     }
-    setAi(env, "");
-    log.step("Redeploying on the free plan (AI assistant disabled)...");
-    try {
-      workerUrl = deployWorker();
-      log.success("Worker deployed (free plan)");
-    } catch (e2) {
-      bail(`Couldn't deploy the Worker:\n\n${errorMessage(e2)}`);
-    }
-  } else {
-    bail(`Couldn't deploy the Worker:\n\n${errorMessage(e)}`);
+  }
+  setAi(env, "");
+  reporter.step("Redeploying on the free plan (AI assistant disabled)...");
+  try {
+    workerUrl = deployWorker();
+    reporter.success("Worker deployed (free plan)");
+  } catch (e2) {
+    bail(`Couldn't deploy the Worker:\n\n${errorMessage(e2)}`, EXIT.RUNTIME);
   }
 }
 
 /* ----------------------------- Worker secrets ----------------------------- */
 
-log.step("Setting worker secrets...");
+reporter.step("Setting worker secrets...");
 const workerSecrets: Record<string, string> = {
   DATABASE_URL: neon.prodDatabaseUrl,
 };
@@ -399,11 +457,12 @@ for (const name of WORKER_SECRETS) {
 try {
   execSync("npx wrangler secret bulk", {
     input: JSON.stringify(workerSecrets),
-    stdio: ["pipe", "inherit", "inherit"],
+    stdio: reporter.json ? "pipe" : ["pipe", "inherit", "inherit"],
   });
-  log.success("Worker secrets set");
-} catch {
-  bail("Failed to set worker secrets. Check the errors above.");
+  reporter.success("Worker secrets set");
+} catch (e) {
+  if (reporter.json) surfaceChildError(e);
+  bail("Failed to set worker secrets. Check the errors above.", EXIT.RUNTIME);
 }
 
 /* ---------------------------------- Done ---------------------------------- */
@@ -412,9 +471,23 @@ const webhookUrl = workerUrl
   ? `${workerUrl}/api/terra/webhook`
   : "<your app URL>/api/terra/webhook";
 
-log.success(`Your app is live at ${pc.cyan(workerUrl || "your Worker URL")}`);
+// No connection strings here: stdout lands in an agent's context/logs, and the
+// dev URL carries the DB password. It's already saved to .env by setup.
+reporter.data({
+  ok: true,
+  appName: env.APP_NAME,
+  workerUrl,
+  webhookUrl: workerUrl ? webhookUrl : "",
+  neonProjectId: env.NEON_PROJECT_ID ?? "",
+  neonOrgId: env.NEON_ORG_ID ?? "",
+  ai: hasWorkerLoaders(),
+});
 
-log.message(
+reporter.success(
+  `Your app is live at ${pc.cyan(workerUrl || "your Worker URL")}`,
+);
+
+reporter.message(
   [
     `${pc.bold(pc.yellow("One last step"))} – point Terra at your webhook`,
     "",
@@ -429,7 +502,7 @@ log.message(
   ].join("\n"),
 );
 
-log.message(
+reporter.message(
   [
     pc.bold("Commands"),
     "",
@@ -438,4 +511,4 @@ log.message(
   ].join("\n"),
 );
 
-outro("Setup complete 🎉");
+reporter.outro("Setup complete 🎉");

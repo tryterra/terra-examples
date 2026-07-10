@@ -1,8 +1,8 @@
-import { isCancel, log, select, spinner } from "@clack/prompts";
+import { isCancel, select } from "@clack/prompts";
 import { bail, runCapture, runJson, updateEnvValue, type Env } from "./helpers";
+import { getReporter, isInteractive } from "./output";
 import { getWorkerName } from "./wrangler";
 
-const interactive = Boolean(process.stdin.isTTY);
 const NEON = "npx neonctl";
 const REGION = process.env.NEON_REGION || "aws-us-east-1";
 
@@ -45,7 +45,7 @@ async function resolveOrg(env: Env): Promise<string> {
   );
   if (orgs.length === 0) bail("No Neon organizations found for this account.");
   if (orgs.length === 1) return orgs[0].id;
-  if (!interactive)
+  if (!isInteractive())
     bail(
       `Multiple Neon orgs found — set NEON_ORG_ID to one of: ${orgs.map((o) => o.id).join(", ")}`,
     );
@@ -64,11 +64,11 @@ function findOrCreateProject(orgId: string, name: string): string {
     "projects",
   ).find((p) => p.name === name);
   if (existing) {
-    log.success(`Using existing Neon project "${name}"`);
+    getReporter().success(`Using existing Neon project "${name}"`);
     return existing.id;
   }
 
-  const s = spinner();
+  const s = getReporter().task();
   s.start(`Creating Neon project "${name}"`);
   const created = runJson<{ project?: Named; id?: string }>(
     `${NEON} projects create --name ${name} --org-id ${orgId} --region-id ${REGION} --cu 0.25-1 -o json`,
@@ -86,13 +86,13 @@ function ensureDevBranch(projectId: string): void {
     "branches",
   ).some((b) => b.name === "dev");
   if (exists) {
-    log.success('Using existing "dev" branch');
+    getReporter().success('Using existing "dev" branch');
     return;
   }
   runCapture(
     `${NEON} branches create --project-id ${projectId} --name dev -o json`,
   );
-  log.success('Created "dev" branch');
+  getReporter().success('Created "dev" branch');
 }
 
 /** Finds or creates the Neon project + dev branch, returns both branch URLs. */
@@ -113,5 +113,5 @@ export async function provisionNeon(env: Env): Promise<NeonResult> {
 /** Deletes the whole Neon project (used by reset). */
 export function deleteProject(projectId: string): void {
   runCapture(`${NEON} projects delete ${projectId} -o json`);
-  log.success(`Deleted Neon project ${projectId}`);
+  getReporter().success(`Deleted Neon project ${projectId}`);
 }
