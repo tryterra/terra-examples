@@ -24,8 +24,6 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
 
-      - run: node -v && npm -v
-
       - name: Resolve version from tag
         id: version
         env:
