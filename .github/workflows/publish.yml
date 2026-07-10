@@ -1,16 +1,20 @@
 name: Publish create-tryterra-app
 
-# Dormant until an intentional Release is cut (or run manually).
+# Publishes on a Release cut (or manual run). Version comes from the tag.
 on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish, e.g. 1.2.0"
+        required: true
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # npm trusted publishing (OIDC); provenance once repo is public
+      id-token: write # npm trusted publishing (OIDC) + provenance
       contents: read
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +27,25 @@ jobs:
       # Trusted publishing + provenance requires npm >= 11.5.1
       - run: npm install -g npm@latest
 
+      - name: Resolve version from tag
+        id: version
+        env:
+          RAW: ${{ github.event.release.tag_name || inputs.version }}
+        run: echo "value=${RAW#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Install
+        working-directory: packages/cli
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: packages/cli
+        run: npm run typecheck
+
+      - name: Set version to match the release tag
+        working-directory: packages/cli
+        run: npm version "${{ steps.version.outputs.value }}" --no-git-tag-version --allow-same-version
+
       - name: Publish
         working-directory: packages/cli
-        run: |
-          npm ci
-          npm publish
+        # Auth via OIDC trusted publishing (configured on npm).
+        run: npm publish --provenance

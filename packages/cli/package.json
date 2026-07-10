@@ -14,7 +14,7 @@
   "bugs": "https://github.com/tryterra/terra-examples/issues",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tryterra/terra-examples.git",
+    "url": "git+https://github.com/tryterra/terra-examples.git",
     "directory": "packages/cli"
   },
   "author": "Terra",
@@ -33,6 +33,7 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsup src/index.ts --format esm --clean",
+    "typecheck": "tsc --noEmit",
     "prepack": "npm run build"
   },
   "dependencies": {
