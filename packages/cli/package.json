@@ -33,6 +33,7 @@
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsup src/index.ts --format esm --clean",
+    "typecheck": "tsc --noEmit",
     "prepack": "npm run build"
   },
   "dependencies": {
