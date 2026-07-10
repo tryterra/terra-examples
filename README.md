@@ -11,6 +11,14 @@ Examples built by [Terra API](https://tryterra.co). One command to pull a full w
 npm create tryterra-app
 ```
 
+**Prefer to let an AI coding agent do it?** Paste this into Claude Code (or Cursor, Copilot, …) and it'll scaffold, configure, and deploy an example for you:
+
+```
+Set up the Terra Basecamp example app for me:
+npx --yes create-tryterra-app@latest terra-basecamp --template unified-api-web-app --yes --json
+Then read the generated AGENTS.md and follow it to fill in .env and deploy with npm run setup. Ask me for any credentials (Cloudflare, Neon, Terra) you need.
+```
+
 ## Examples
 
 | Example                           | Description                                                | Stack                                    |
@@ -21,7 +29,7 @@ _More examples coming. Each is a standalone, runnable project with its own READM
 
 ### Terra Basecamp
 
-`unified-api-web-app` — [browse the template »](./packages/cli/templates/unified-api-web-app)
+`unified-api-web-app` – [browse the template »](./packages/cli/templates/unified-api-web-app)
 
 An example web app built on Terra's [Unified API](https://tryterra.co/products/api). It
 connects users' wearables and health data sources (Garmin, Fitbit, Oura, and more) and
@@ -47,7 +55,7 @@ npm run setup   # provision infra and configure (guided, where supported)
 npm run dev     # start the dev server
 ```
 
-Use any package manager — `npm`, `pnpm create tryterra-app`, `yarn create tryterra-app`,
+Use any package manager – `npm`, `pnpm create tryterra-app`, `yarn create tryterra-app`,
 or `bun create tryterra-app`. The CLI installs dependencies with whichever you invoke.
 
 ## Using with AI coding agents
@@ -65,14 +73,9 @@ npx --yes create-tryterra-app@latest my-app --template unified-api-web-app --yes
 
 `--yes` skips every prompt, `--json` keeps stdout a clean JSON channel, and exit
 codes (`0` ok · `1` usage · `2` execution) tell the agent what happened. The
-leading `npx --yes` accepts npx's own install prompt. See [AGENTS.md](./AGENTS.md)
-for the full workflow, JSON shape, and deploy steps.
-
-**Example prompt to give an agent:**
-
-> Scaffold the Terra Basecamp example into `./my-terra-app` and get it running.
-> Run `npx --yes create-tryterra-app@latest my-terra-app --template unified-api-web-app --yes --json`,
-> parse the JSON result, then follow `AGENTS.md` to populate `.env` and run `npm run setup`.
+leading `npx --yes` accepts npx's own install prompt. The paste-in prompt above
+is the quickest way to hand this to an agent; see [AGENTS.md](./AGENTS.md) for the
+full workflow, JSON shape, and deploy steps.
 
 Full CLI options live in [packages/cli](./packages/cli/README.md). Requires Node.js 20+.
 
