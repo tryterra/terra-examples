@@ -3,7 +3,7 @@ import { bail, runCapture, runJson, updateEnvValue, type Env } from "./helpers";
 import { getReporter, isInteractive } from "./output";
 import { getWorkerName } from "./wrangler";
 
-const NEON = "npx neonctl";
+const NEON = "neonctl";
 const REGION = process.env.NEON_REGION || "aws-us-east-1";
 
 export interface NeonResult {

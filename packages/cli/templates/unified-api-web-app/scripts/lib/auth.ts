@@ -8,15 +8,40 @@ import {
   type Env,
 } from "./helpers";
 import { getReporter, isInteractive } from "./output";
-import { suppressSkillsPrompt } from "./wrangler";
+import { checkR2Enabled, suppressSkillsPrompt } from "./wrangler";
 
 type Account = { name: string; id: string };
+
+/** dash.cloudflare.com R2 page for the account (redirect form if id unknown). */
+function r2DashboardUrl(accountId?: string): string {
+  return accountId
+    ? `https://dash.cloudflare.com/${accountId}/r2/overview`
+    : "https://dash.cloudflare.com/?to=/:account/r2/overview";
+}
+
+/** Fails fast with a fix-it link if the account hasn't enabled R2 (headless + interactive; skips inconclusive probes). */
+function ensureR2Enabled(accountId?: string): void {
+  const s = getReporter().task();
+  s.start("Checking R2 is enabled");
+  const status = checkR2Enabled();
+  if (status === "disabled") {
+    s.stop("R2 is not enabled");
+    bail(
+      "R2 object storage isn't enabled on this Cloudflare account. This app\n" +
+        "stores Terra webhook payloads in R2, so setup can't continue.\n\n" +
+        "  Enable R2 (free tier covers the first 10 GB; a card is required):\n" +
+        `  ${r2DashboardUrl(accountId)}\n\n` +
+        "  Then re-run: npm run setup",
+    );
+  }
+  s.stop(status === "enabled" ? "R2 is enabled" : "R2 check skipped");
+}
 
 /** Parses the account name/id rows from `wrangler whoami` (empty = signed out). */
 async function cloudflareAccounts(): Promise<Account[]> {
   let out: string;
   try {
-    out = await runCaptureAsync("npx wrangler whoami 2>&1");
+    out = await runCaptureAsync("wrangler whoami 2>&1");
   } catch (e) {
     out = (e as { stdout?: Buffer }).stdout?.toString() ?? "";
   }
@@ -58,6 +83,7 @@ export async function ensureCloudflareAuth(env: Env): Promise<void> {
     process.env.CLOUDFLARE_API_TOKEN = env.CLOUDFLARE_API_TOKEN;
     if (env.CLOUDFLARE_ACCOUNT_ID)
       process.env.CLOUDFLARE_ACCOUNT_ID = env.CLOUDFLARE_ACCOUNT_ID;
+    ensureR2Enabled(env.CLOUDFLARE_ACCOUNT_ID);
     return;
   }
   suppressSkillsPrompt();
@@ -75,10 +101,14 @@ export async function ensureCloudflareAuth(env: Env): Promise<void> {
         "Not signed in to Cloudflare. Set CLOUDFLARE_API_TOKEN or run `npx wrangler login`.",
       );
     getReporter().step("Signing in to Cloudflare (opens your browser)…");
-    runVisible("npx wrangler login");
+    runVisible("wrangler login");
     accounts = await cloudflareAccounts();
   }
   await chooseAccount(env, accounts);
+  ensureR2Enabled(
+    process.env.CLOUDFLARE_ACCOUNT_ID ??
+      (accounts.length === 1 ? accounts[0].id : undefined),
+  );
 }
 
 /** Ensures a Neon session: API key if set, else `neonctl auth`. */
@@ -89,7 +119,7 @@ export async function ensureNeonAuth(env: Env): Promise<void> {
   }
   const s = getReporter().task();
   s.start("Checking Neon sign-in");
-  const signedIn = await commandSucceeds("npx neonctl me");
+  const signedIn = await commandSucceeds("neonctl me");
   s.stop(signedIn ? "Signed in to Neon" : "Neon sign-in needed");
 
   if (!signedIn) {
@@ -98,6 +128,6 @@ export async function ensureNeonAuth(env: Env): Promise<void> {
         "Not signed in to Neon. Set NEON_API_KEY or run `npx neonctl auth`.",
       );
     getReporter().step("Signing in to Neon (opens your browser)…");
-    runVisible("npx neonctl auth");
+    runVisible("neonctl auth");
   }
 }

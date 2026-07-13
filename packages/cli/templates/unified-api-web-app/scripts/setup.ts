@@ -18,6 +18,7 @@ import {
   runVisible,
   surfaceChildError,
   updateEnvValue,
+  withLocalBin,
   type Env,
 } from "./lib/helpers";
 import { provisionNeon } from "./lib/neon";
@@ -232,6 +233,27 @@ function setAi(env: Env, key: string): void {
   setWorkerLoaders(Boolean(key));
 }
 
+/** dash.cloudflare.com Workers plans page (redirect form if account id unknown). */
+function workersPlansUrl(env: Env): string {
+  const id = process.env.CLOUDFLARE_ACCOUNT_ID || env.CLOUDFLARE_ACCOUNT_ID;
+  return id
+    ? `https://dash.cloudflare.com/${id}/workers/plans`
+    : "https://dash.cloudflare.com/?to=/:account/workers/plans";
+}
+
+/** Flags the Workers Paid plan requirement + link up front (no pre-deploy probe exists; deploy-time fallback handles the wall). */
+function noteWorkersPaidPlan(env: Env): void {
+  reporter.message(
+    [
+      `${pc.bold("Heads up")}: the AI assistant runs on Worker Loaders, which`,
+      "needs the Cloudflare Workers Paid plan ($5/mo). On the free plan the",
+      "deploy will stop and offer to continue with AI disabled.",
+      "",
+      `  Check/upgrade your plan: ${pc.cyan(workersPlansUrl(env))}`,
+    ].join("\n"),
+  );
+}
+
 /** AI opt-in: enables chat + the analyze tool (needs a key + the paid plan). */
 async function resolveAiAssistant(env: Env): Promise<void> {
   if (!interactive) {
@@ -242,6 +264,7 @@ async function resolveAiAssistant(env: Env): Promise<void> {
     }
     setWorkerLoaders(enable);
     if (!enable) env.ANTHROPIC_API_KEY = ""; // don't ship the key; leave .env as-is
+    if (enable) noteWorkersPaidPlan(env);
     return;
   }
 
@@ -269,6 +292,7 @@ async function resolveAiAssistant(env: Env): Promise<void> {
     key = answer.trim();
   }
   setAi(env, key);
+  noteWorkersPaidPlan(env);
 }
 
 /* ----------------------------- Run migrations ----------------------------- */
@@ -277,21 +301,21 @@ async function resolveAiAssistant(env: Env): Promise<void> {
 function runMigrations(prodDatabaseUrl: string): void {
   reporter.step("Generating database migrations...");
   try {
-    runVisible("npx drizzle-kit generate");
+    runVisible("drizzle-kit generate");
   } catch {
     bail("Migration generation failed. Check the errors above.", EXIT.RUNTIME);
   }
 
   reporter.step("Applying migrations to dev branch...");
   try {
-    runVisible("npx drizzle-kit migrate");
+    runVisible("drizzle-kit migrate");
   } catch {
     bail("Dev branch migration failed. Check the errors above.", EXIT.RUNTIME);
   }
 
   reporter.step("Applying migrations to production branch...");
   try {
-    runVisible("npx drizzle-kit migrate", {
+    runVisible("drizzle-kit migrate", {
       env: { ...process.env, DATABASE_URL: prodDatabaseUrl },
     });
   } catch {
@@ -402,7 +426,7 @@ try {
 
 reporter.step("Building the app (vite build)...");
 try {
-  runVisible("npx vite build");
+  runVisible("vite build");
   reporter.success("App built");
 } catch {
   bail("Vite build failed. Check the errors above.", EXIT.RUNTIME);
@@ -455,9 +479,10 @@ for (const name of WORKER_SECRETS) {
   if (env[name]) workerSecrets[name] = env[name];
 }
 try {
-  execSync("npx wrangler secret bulk", {
+  execSync("wrangler secret bulk", {
     input: JSON.stringify(workerSecrets),
     stdio: reporter.json ? "pipe" : ["pipe", "inherit", "inherit"],
+    env: withLocalBin(),
   });
   reporter.success("Worker secrets set");
 } catch (e) {

@@ -1,5 +1,6 @@
 import { exec, execSync, type ExecSyncOptions } from "node:child_process";
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { delimiter, resolve } from "node:path";
 import { promisify } from "node:util";
 import type { z } from "zod";
 import { EXIT, getReporter } from "./output";
@@ -8,16 +9,37 @@ const execAsync = promisify(exec);
 
 /* --------------------------------- Shell ---------------------------------- */
 
+/** The project's local bin dir — hosts wrangler/neonctl/drizzle-kit/vite. */
+const LOCAL_BIN = resolve(process.cwd(), "node_modules", ".bin");
+
+/** Child env with local bins ahead on PATH, so bare tool names skip `npx`. */
+export function withLocalBin(
+  env: NodeJS.ProcessEnv = process.env,
+): NodeJS.ProcessEnv {
+  const path = env.PATH ?? "";
+  return { ...env, PATH: path ? `${LOCAL_BIN}${delimiter}${path}` : LOCAL_BIN };
+}
+
 /** Runs a command and returns its trimmed stdout. */
 export function runCapture(cmd: string, opts: ExecSyncOptions = {}): string {
-  return execSync(cmd, { encoding: "utf-8", stdio: "pipe", ...opts })
+  return execSync(cmd, {
+    encoding: "utf-8",
+    stdio: "pipe",
+    ...opts,
+    env: withLocalBin(opts.env),
+  })
     .toString()
     .trim();
 }
 
 /** Runs a command, discarding its output (throws on non-zero exit). */
 export function runQuiet(cmd: string, opts: ExecSyncOptions = {}): void {
-  execSync(cmd, { encoding: "utf-8", stdio: "pipe", ...opts });
+  execSync(cmd, {
+    encoding: "utf-8",
+    stdio: "pipe",
+    ...opts,
+    env: withLocalBin(opts.env),
+  });
 }
 
 /** Writes a failed command's captured output to stderr (json-mode diagnostics). */
@@ -29,12 +51,13 @@ export function surfaceChildError(e: unknown): void {
 
 /** Streams a command's output live (human) or captures it and shows it only on failure (json). */
 export function runVisible(cmd: string, opts: ExecSyncOptions = {}): void {
+  const env = withLocalBin(opts.env);
   if (!getReporter().json) {
-    execSync(cmd, { encoding: "utf-8", stdio: "inherit", ...opts });
+    execSync(cmd, { encoding: "utf-8", stdio: "inherit", ...opts, env });
     return;
   }
   try {
-    execSync(cmd, { encoding: "utf-8", stdio: "pipe", ...opts });
+    execSync(cmd, { encoding: "utf-8", stdio: "pipe", ...opts, env });
   } catch (e) {
     surfaceChildError(e);
     throw e;
@@ -51,14 +74,17 @@ export function runJson<T = unknown>(
 
 /** Async runCapture: keeps the event loop free so a spinner can animate. */
 export async function runCaptureAsync(cmd: string): Promise<string> {
-  const { stdout } = await execAsync(cmd, { encoding: "utf-8" });
+  const { stdout } = await execAsync(cmd, {
+    encoding: "utf-8",
+    env: withLocalBin(),
+  });
   return stdout.toString().trim();
 }
 
 /** Resolves true if the command exits cleanly (async auth checks). */
 export async function commandSucceeds(cmd: string): Promise<boolean> {
   try {
-    await execAsync(cmd);
+    await execAsync(cmd, { env: withLocalBin() });
     return true;
   } catch {
     return false;
