@@ -32,7 +32,7 @@ if (!env.NEON_PROJECT_ID) {
 
 reporter.step("Applying migrations to the production branch...");
 try {
-  runVisible("npx drizzle-kit migrate", {
+  runVisible("drizzle-kit migrate", {
     env: {
       ...process.env,
       DATABASE_URL: connectionString(env.NEON_PROJECT_ID),

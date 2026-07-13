@@ -81,10 +81,25 @@ export function setWorkerLoaders(enabled: boolean): void {
 /** Deploy failed because the account is on the free plan (Worker Loaders). */
 export class PaidPlanError extends Error {}
 
+/** Cloudflare's signature when the account hasn't enabled R2 (error code 10042). */
+const R2_NOT_ENABLED = /\b10042\b|enable R2/i;
+
+/** Read-only R2 probe: "disabled" means the account hasn't enabled R2, "unknown" means inconclusive (don't block setup). */
+export function checkR2Enabled(): "enabled" | "disabled" | "unknown" {
+  try {
+    runCapture("wrangler r2 bucket list 2>&1");
+    return "enabled";
+  } catch (e) {
+    const err = e as { stdout?: Buffer; stderr?: Buffer };
+    const output = `${err.stdout ?? ""}${err.stderr ?? ""}${errorMessage(e)}`;
+    return R2_NOT_ENABLED.test(output) ? "disabled" : "unknown";
+  }
+}
+
 /** Creates the R2 bucket, treating "already exists" as success. */
 export function ensureR2Bucket(name: string): void {
   try {
-    runCapture(`npx wrangler r2 bucket create ${name}`);
+    runCapture(`wrangler r2 bucket create ${name}`);
   } catch (e) {
     const err = e as { stdout?: Buffer; stderr?: Buffer };
     const output = `${err.stdout ?? ""}${err.stderr ?? ""}${errorMessage(e)}`;
@@ -102,7 +117,7 @@ function errorBlock(output: string): string {
 export function deployWorker(): string {
   let out: string;
   try {
-    out = runCapture("npx wrangler deploy 2>&1");
+    out = runCapture("wrangler deploy 2>&1");
   } catch (e) {
     const captured =
       (e as { stdout?: Buffer }).stdout?.toString() ?? errorMessage(e);
@@ -121,7 +136,7 @@ export function deployWorker(): string {
 /** Deletes the Worker (used by reset); ignores "not found". */
 export function deleteWorker(name: string): void {
   try {
-    runVisible(`npx wrangler delete ${name} --force`);
+    runVisible(`wrangler delete ${name} --force`);
   } catch (e) {
     getReporter().warn(`Could not delete Worker "${name}": ${errorMessage(e)}`);
   }
@@ -130,7 +145,7 @@ export function deleteWorker(name: string): void {
 /** Best-effort R2 bucket delete (requires the bucket be empty). */
 export function deleteR2Bucket(name: string): void {
   try {
-    runCapture(`npx wrangler r2 bucket delete ${name} 2>&1`);
+    runCapture(`wrangler r2 bucket delete ${name} 2>&1`);
     getReporter().success(`Deleted R2 bucket "${name}"`);
   } catch (e) {
     getReporter().warn(

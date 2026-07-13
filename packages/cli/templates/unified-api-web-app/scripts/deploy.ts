@@ -8,6 +8,7 @@ import {
   loadEnv,
   runVisible,
   surfaceChildError,
+  withLocalBin,
 } from "./lib/helpers";
 import { connectionString } from "./lib/neon";
 import { EXIT } from "./lib/output";
@@ -49,7 +50,7 @@ const prodDbUrl = connectionString(env.NEON_PROJECT_ID);
 const build = reporter.task();
 build.start("Building the app");
 try {
-  runVisible("npx vite build");
+  runVisible("vite build");
   build.stop("App built");
 } catch {
   build.stop("Build failed");
@@ -60,8 +61,8 @@ try {
 
 reporter.step("Applying database migrations to production...");
 try {
-  runVisible("npx drizzle-kit generate");
-  runVisible("npx drizzle-kit migrate", {
+  runVisible("drizzle-kit generate");
+  runVisible("drizzle-kit migrate", {
     env: { ...process.env, DATABASE_URL: prodDbUrl },
   });
   reporter.success("Migrations applied");
@@ -89,9 +90,10 @@ for (const name of WORKER_SECRETS) {
   if (env[name]) workerSecrets[name] = env[name];
 }
 try {
-  execSync("npx wrangler secret bulk", {
+  execSync("wrangler secret bulk", {
     input: JSON.stringify(workerSecrets),
     stdio: reporter.json ? "pipe" : ["pipe", "inherit", "inherit"],
+    env: withLocalBin(),
   });
   reporter.success("Worker secrets set");
 } catch (e) {
