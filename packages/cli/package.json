@@ -38,12 +38,10 @@
   },
   "dependencies": {
     "@clack/prompts": "^1.0.1",
-    "figlet": "^1.8.0",
     "picocolors": "^1.1.1",
     "validate-npm-package-name": "^6.0.0"
   },
   "devDependencies": {
-    "@types/figlet": "^1.7.0",
     "@types/node": "^22.15.30",
     "@types/validate-npm-package-name": "^4.0.2",
     "tsup": "^8.5.0",
