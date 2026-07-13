@@ -31,6 +31,20 @@ export function installCommand(pm: PackageManager): string {
   return pm === "yarn" ? "yarn" : `${pm} install`;
 }
 
+/** Install command run during scaffold: skips audit/funding, prefers cache, and uses `npm ci` when a lockfile ships. */
+export function installRunCommand(pm: PackageManager, lockfile: boolean): string {
+  switch (pm) {
+    case "npm":
+      return `npm ${lockfile ? "ci" : "install"} --no-audit --no-fund --prefer-offline`;
+    case "pnpm":
+      return "pnpm install --prefer-offline";
+    case "yarn":
+      return "yarn";
+    case "bun":
+      return "bun install";
+  }
+}
+
 /** How to run a package.json script — yarn/pnpm drop the `run` keyword. */
 export function runScriptCommand(pm: PackageManager, script: string): string {
   return pm === "yarn" || pm === "pnpm" ? `${pm} ${script}` : `${pm} run ${script}`;

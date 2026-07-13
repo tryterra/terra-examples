@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { fileURLToPath } from "node:url";
@@ -17,6 +17,7 @@ import { createReporter, EXIT, getReporter } from "./lib/output.js";
 import {
   getUserPkgManager,
   installCommand,
+  installRunCommand,
   isPackageManager,
   PACKAGE_MANAGERS,
   type PackageManager,
@@ -214,12 +215,14 @@ async function run(): Promise<void> {
   const skipInstall =
     values["skip-install"] === true || values["no-install"] === true;
   if (!skipInstall) {
+    const lockfile = existsSync(join(targetDir, "package-lock.json"));
+    const installRun = installRunCommand(pkgManager, lockfile);
     const installing = reporter.task();
-    installing.start(`Installing dependencies (${install})`);
+    installing.start("Installing dependencies");
     try {
       // Runs async (output hidden) so the spinner animates while it works;
       // captured stderr is surfaced only if the install fails.
-      await runCommand(install, targetDir);
+      await runCommand(installRun, targetDir);
       installing.stop("Dependencies installed");
     } catch (e) {
       installing.stop("Dependency install failed");
