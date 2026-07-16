@@ -1,0 +1,10 @@
+name = "grip-link"
+main = "worker.js"
+account_id = "b9bfb9b9db1ed7a4b5d7335bde614da1"
+compatibility_date = "2026-07-01"
+
+# Custom domain: serves grip.tryterra.co (DNS record is created
+# automatically when the domain is attached).
+routes = [
+  { pattern = "grip.tryterra.co", custom_domain = true }
+]

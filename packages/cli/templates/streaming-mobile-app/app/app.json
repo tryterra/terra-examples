@@ -1,0 +1,100 @@
+{
+  "expo": {
+    "name": "Terra Grip",
+    "slug": "terra-streaming-demo",
+    "scheme": "terrastreaming",
+    "version": "1.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F8FAFF",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F8FAFF"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "associatedDomains": [
+        "applinks:grip.tryterra.co"
+      ],
+      "infoPlist": {
+        "NSBluetoothAlwaysUsageDescription": "This demo connects to BLE heart-rate sensors to stream live data to Terra.",
+        "NSMotionUsageDescription": "Required if streaming motion data from the phone's built-in sensors.",
+        "NSHealthShareUsageDescription": "The Terra SDK can read workout data from Apple Health when streaming from an Apple Watch. This demo only accesses Health data with your explicit consent.",
+        "NSHealthUpdateUsageDescription": "The Terra SDK can record workout sessions to Apple Health when streaming from an Apple Watch. This demo only writes Health data with your explicit consent.",
+        "UIBackgroundModes": [
+          "bluetooth-central"
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "co.tryterra.streamingdemo"
+    },
+    "android": {
+      "edgeToEdgeEnabled": true,
+      "package": "co.tryterra.streamingdemo",
+      "versionCode": 4,
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "grip.tryterra.co",
+              "pathPrefix": "/pair"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
+      "permissions": [
+        "android.permission.BLUETOOTH_SCAN",
+        "android.permission.BLUETOOTH_CONNECT",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACTIVITY_RECOGNITION",
+        "android.permission.BODY_SENSORS",
+        "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "buildReactNativeFromSource": true
+          },
+          "android": {
+            "minSdkVersion": 28
+          }
+        }
+      ],
+      "expo-fmt-consteval-fix",
+      "expo-secure-store",
+      [
+        "@bacons/apple-targets",
+        {
+          "appleTeamId": "8HP4B6QYR7"
+        }
+      ],
+      "./plugins/withWatchTerraPod.js",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Used to scan the pairing QR code from the Terra dashboard."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "6ffefc71-1d25-4f34-8ee5-0d4181bc3a26"
+      }
+    },
+    "owner": "terra-api"
+  }
+}
