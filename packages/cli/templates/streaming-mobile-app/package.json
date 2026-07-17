@@ -1,0 +1,16 @@
+{
+  "name": "terra-grip",
+  "description": "Terra Grip: a React Native app built on Terra's Streaming API that streams real-time data from BLE sensors, phone sensors, and watches straight to Terra. Built with React Native (Expo) and the terra-rt SDK, with Apple Watch and Wear OS companion apps",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "author": "Terra API (https://tryterra.co)",
+  "scripts": {
+    "postinstall": "npm --prefix app install",
+    "dev": "npm --prefix app run start",
+    "ios": "npm --prefix app run ios",
+    "android": "npm --prefix app run android",
+    "test": "npm --prefix app test",
+    "typecheck": "npm --prefix app run typecheck"
+  }
+}

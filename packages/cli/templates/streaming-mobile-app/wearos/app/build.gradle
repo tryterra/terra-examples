@@ -1,0 +1,40 @@
+plugins {
+  id 'com.android.application'
+  id 'org.jetbrains.kotlin.android'
+}
+
+android {
+  namespace 'co.tryterra.grip.wear'
+  compileSdk 34
+
+  defaultConfig {
+    // Same package as the phone app: Play distributes the watch binary
+    // under the same listing (Wear OS form factor track).
+    applicationId 'co.tryterra.streamingdemo'
+    minSdk 30
+    targetSdk 34
+    versionCode 1
+    versionName '1.1.0'
+  }
+
+  buildFeatures {
+    compose true
+  }
+  composeOptions {
+    kotlinCompilerExtensionVersion '1.5.14'
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+  kotlinOptions {
+    jvmTarget = '17'
+  }
+}
+
+dependencies {
+  implementation 'co.tryterra:terra-wearos:0.0.6'
+  implementation 'androidx.activity:activity-compose:1.9.0'
+  implementation 'androidx.wear.compose:compose-material:1.3.1'
+  implementation 'androidx.wear.compose:compose-foundation:1.3.1'
+}

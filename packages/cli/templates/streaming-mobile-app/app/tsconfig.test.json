@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "skipLibCheck": true,
+    "target": "es2020",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "types": ["jest", "node"]
+  },
+  "include": [
+    "src/sources/**/*.ts",
+    "src/producer/ProducerController.ts",
+    "src/auth/TokenProvider.ts",
+    "src/auth/SessionMintProvider.ts",
+    "src/auth/tokenVault.ts",
+    "src/terraUrls.ts",
+    "src/types.ts",
+    "__tests__/**/*.ts"
+  ]
+}
