@@ -46,7 +46,7 @@ The mirror is a no-op (no PR) when the template already matches the source.
 
 Each example is one Terra product, mirrored from its own source repo. Convention: `tryterra/<product>-<form>` (e.g. `health-fitness-web-app`, `health-fitness-mobile-app`).
 
-1. **Create the source repo** `tryterra/<product>-<form>` and build the app there as a standalone, runnable project. Commit its ignore file as `.gitignore` (the mirror renames it to `gitignore`). If it should offer guided setup, give its `package.json` a `setup` script; the CLI offers to run it after install.
+1. **Create the source repo** `tryterra/<product>-<form>` and build the app there as a standalone, runnable project. Commit its ignore file as `.gitignore` (the mirror renames it to `gitignore`). The repo root must have a `package.json` with a `name` and a one-line `description`: the CLI's picker and `--list` read the description, and scaffolding fails without the file (CI enforces this). If the app lives in a subdirectory, delegate the root scripts to it (see `streaming-mobile-app`). If it should offer guided setup, give the root `package.json` a `setup` script; the CLI offers to run it after install.
 
 2. **Add the mirror workflow** to the source repo at `.github/workflows/sync-to-examples.yml` (copy it from an existing source repo). It is release-gated (`on: release: published` + `workflow_dispatch`). Point the mirror at this repo's `packages/cli/templates/<name>/`.
 

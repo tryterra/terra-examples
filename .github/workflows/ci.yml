@@ -1,0 +1,36 @@
+name: CI
+
+# Guards the CLI and its bundled templates on every PR: typecheck the CLI,
+# verify each template ships the root package.json the scaffolder depends on,
+# then actually scaffold each template as a smoke test.
+on:
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/cli
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Validate templates
+        run: npm run validate:templates
+
+      - name: Scaffold each template (smoke test)
+        run: |
+          for dir in templates/*/; do
+            t=$(basename "$dir")
+            npx tsx src/index.ts "$RUNNER_TEMP/smoke-$t" --template "$t" --yes --json --skip-install --no-git
+          done
