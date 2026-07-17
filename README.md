@@ -24,6 +24,7 @@ Then read the generated AGENTS.md and follow it to fill in .env and deploy with 
 | Example                           | Description                                                | Stack                                    |
 | --------------------------------- | ---------------------------------------------------------- | ---------------------------------------- |
 | [Terra Basecamp](#terra-basecamp) | Wearable & health data on a dashboard with an AI assistant | React · Hono · Cloudflare Workers · Neon |
+| [Terra Grip](#terra-grip)         | Real-time wearable streaming from a mobile app             | React Native · Expo · terra-rt           |
 
 _More examples coming. Each is a standalone, runnable project with its own README._
 
@@ -45,14 +46,47 @@ one-command setup, and single-worker deployment.
 npm create tryterra-app -- --template unified-api-web-app
 ```
 
+### Terra Grip
+
+`streaming-mobile-app` ([browse the template »](./packages/cli/templates/streaming-mobile-app))
+
+An example mobile app built on Terra's [Streaming API](https://docs.tryterra.co) and the
+[`terra-rt`](https://www.npmjs.com/package/terra-rt) SDK. Scan a pairing QR code from the
+Terra dashboard and the phone streams live sensor data to Terra: from BLE devices, the
+phone's own sensors, or a companion watch app. No backend, no accounts, no API keys on
+the device.
+
+**Demonstrates:** QR pairing, real-time BLE and phone-sensor streaming, background
+streaming, Apple Watch and Wear OS companion apps, and a demo mode that runs the full
+flow on synthetic data with no hardware.
+
+**Stack:** React Native (Expo) · terra-rt SDK · watchOS (SwiftUI) · Wear OS (Kotlin)
+
+```bash
+npm create tryterra-app -- --template streaming-mobile-app
+```
+
+The Terra RT SDK is a native module, so the app needs a development build (Expo Go is
+not supported), and pairing needs a physical phone. See the
+[template README](./packages/cli/templates/streaming-mobile-app/README.md) for details.
+
 ## Getting started
 
-Run the command above, pick an example, and name a directory when prompted. Then:
+Run the command above, pick an example, and name a directory when prompted. What to run
+next depends on the example; its README has the specifics. For Terra Basecamp:
 
 ```bash
 cd my-app
 npm run setup   # provision infra and configure (guided, where supported)
 npm run dev     # start the dev server
+```
+
+For Terra Grip (a native mobile app):
+
+```bash
+cd my-app/app
+npm install
+npx expo run:ios   # or: npx expo run:android
 ```
 
 Use any package manager – `npm`, `pnpm create tryterra-app`, `yarn create tryterra-app`,

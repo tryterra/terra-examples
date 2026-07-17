@@ -72,6 +72,11 @@ missing required keys. Drive it like this:
 You can also let the CLI run setup right after scaffolding with `--setup`, but
 `.env` must already hold the required credentials, or setup will fail fast.
 
+Not every template has a setup script. `streaming-mobile-app` (Terra Grip) is a
+React Native (Expo) mobile app with nothing to provision or deploy; building
+and running it needs Xcode or Android Studio and, for real pairing, a physical
+phone. Follow the scaffolded project's own README instead of the steps above.
+
 ## Example prompt (for humans directing an agent)
 
 > Scaffold the Terra Basecamp example into `./my-terra-app` and get it running.
