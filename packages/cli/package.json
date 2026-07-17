@@ -34,6 +34,7 @@
     "dev": "tsx src/index.ts",
     "build": "tsup src/index.ts --format esm --clean",
     "typecheck": "tsc --noEmit",
+    "validate:templates": "node scripts/validate-templates.mjs",
     "prepack": "npm run build"
   },
   "dependencies": {
