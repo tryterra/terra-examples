@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Terra design tokens — the subset of terra-dashboard-v2's palette this demo
+   uses. Light theme only, matching the Terra dashboard. */
+@theme {
+  --color-primary: #008aff;
+  --color-default: #1e293a; /* primary text */
+  --color-neutral: #9193a3; /* secondary text */
+  --color-outline-grey: #e0e0e0;
+  --color-background: #f8faff;
+  --color-success: #20ba4b;
+  --color-failure: #e02d3c;
+  --color-failure-background: #fdedef;
+  --color-warning: #bb4d00;
+  --color-warning-background: #fff4e8;
+  --color-dark-neutral: #49525f;
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  @apply bg-background text-default font-sans antialiased;
+}
