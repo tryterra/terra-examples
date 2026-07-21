@@ -25,6 +25,7 @@ Then read the generated AGENTS.md and follow it to fill in .env and deploy with 
 | --------------------------------- | ---------------------------------------------------------- | ---------------------------------------- |
 | [Terra Basecamp](#terra-basecamp) | Wearable & health data on a dashboard with an AI assistant | React · Hono · Cloudflare Workers · Neon |
 | [Terra Grip](#terra-grip)         | Real-time wearable streaming from a mobile app             | React Native · Expo · terra-rt           |
+| [Terra Pulse](#terra-pulse)       | Live wearable streaming rendered on a web dashboard        | React · Vite · Express                   |
 
 _More examples coming. Each is a standalone, runnable project with its own README._
 
@@ -69,6 +70,25 @@ npm create tryterra-app -- --template streaming-mobile-app
 The Terra RT SDK is a native module, so the app needs a development build (Expo Go is
 not supported), and pairing needs a physical phone. See the
 [template README](./packages/cli/templates/streaming-mobile-app/README.md) for details.
+
+### Terra Pulse
+
+`streaming-consumer-web-app` ([browse the template »](./packages/cli/templates/streaming-consumer-web-app))
+
+An example web app built on Terra's [Streaming API](https://docs.tryterra.co/streaming-api).
+It connects to Terra's WebSocket broker as a consumer and renders live readings (heart
+rate, steps, acceleration, and more) on a real-time dashboard. A tiny token server stands
+in for your backend; the browser holds the WebSocket connection itself.
+
+**Demonstrates:** server-side consumer-token minting, the full connection lifecycle
+(HELLO, IDENTIFY, READY, DISPATCH) with heartbeats, resilient reconnects with backoff,
+per-user live charts and sparkline stat cards, and honest connection states.
+
+**Stack:** React 19 (Vite 7) · Tailwind CSS v4 · Recharts · Express token server · framework-free WebSocket client (no SDK)
+
+```bash
+npm create tryterra-app -- --template streaming-consumer-web-app
+```
 
 ## Getting started
 

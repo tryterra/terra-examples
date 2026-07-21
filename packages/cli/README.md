@@ -50,6 +50,7 @@ execution failure. See [AGENTS.md](../../AGENTS.md) for the full agent workflow.
 
 - **unified-api-web-app** (Terra Basecamp): connect wearables and health sources through Terra's Unified API and view them on a health dashboard with an AI assistant. React, Hono on Cloudflare Workers, Neon Postgres, Durable Objects.
 - **streaming-mobile-app** (Terra Grip): stream real-time wearable and sensor data to Terra from a React Native app, with Apple Watch and Wear OS companion apps. React Native (Expo), terra-rt SDK.
+- **streaming-consumer-web-app** (Terra Pulse): connect to Terra's Streaming API as a consumer and render live wearable readings on a real-time web dashboard. React 19 (Vite), Tailwind, Recharts, Express token server.
 
 Requires Node.js 20+.
 
