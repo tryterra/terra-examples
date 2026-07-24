@@ -1,0 +1,5 @@
+{
+  "orders": { "total": 1, "by_status": { "order.delivery_fulfilled": 1 } },
+  "results": { "total": 1, "missing": 0 },
+  "webhooks": { "failed_total": 0, "daily": [] }
+}

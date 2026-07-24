@@ -1,0 +1,5 @@
+{
+  "client_id": "example-dev-id",
+  "customer_id": "EXAMPLECUSTOMER",
+  "webhook_url": "https://httpbin.org/post"
+}

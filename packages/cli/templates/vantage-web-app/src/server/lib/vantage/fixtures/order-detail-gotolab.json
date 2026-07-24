@@ -1,0 +1,88 @@
+{
+  "order_id": "338735426810802176",
+  "client_id": "example-dev-id",
+  "client_order_reference_id": "EXAPP-mrxshyxg-efghu5",
+  "recipient": {
+    "id": "338735426810802177",
+    "first_name": "Alexandra",
+    "last_name": "Harper",
+    "date_of_birth": "1990-05-15",
+    "gender_at_birth": "male",
+    "email": "alexandra.harper@example.com",
+    "phone_number": "+447911123456"
+  },
+  "shipping_address": null,
+  "requested_lab_address": {
+    "country_code": "US",
+    "address_line_1": "268 3Rd Ave",
+    "city": "New York",
+    "administrative_area": "NY",
+    "postal_code": "10010-6313"
+  },
+  "confirmed_lab_address": {
+    "country_code": "US",
+    "address_line_1": "268 3Rd Ave",
+    "city": "New York",
+    "administrative_area": "NY",
+    "postal_code": "10010-6313"
+  },
+  "confirmed_lab": {
+    "code": "Y6M",
+    "name": "Quest Diagnostics - 268 3rd Avenue",
+    "address": {
+      "country_code": "US",
+      "address_line_1": "268 3Rd Ave",
+      "city": "New York",
+      "administrative_area": "NY",
+      "postal_code": "10010-6313"
+    },
+    "phone": "646-933-8014",
+    "hours": {
+      "Friday": "8:00 am-4:00 pm",
+      "Monday": "8:00 am-4:00 pm",
+      "Saturday": "",
+      "Thursday": "8:00 am-4:00 pm",
+      "Tuesday": "8:00 am-4:00 pm",
+      "Wednesday": "8:00 am-4:00 pm"
+    },
+    "latitude": 0,
+    "longitude": 0,
+    "scheduling": true
+  },
+  "requested_lab": {
+    "code": "Y6M"
+  },
+  "items": [
+    {
+      "order_id": "338735426810802176",
+      "order_item_id": "338735426810802179",
+      "variant_id": "100021",
+      "product_type_id": "1",
+      "price_per_item_cents": 4999,
+      "quantity": 1,
+      "currency": 840,
+      "results_status": "results.awaiting_sample",
+      "item_status": 1,
+      "test_taker_ids": ["338735452354113536"],
+      "supplier_item_id": "338735452270227456"
+    }
+  ],
+  "order_financials": {
+    "discount_cents": 0,
+    "total_cents": 4999,
+    "currency": 840
+  },
+  "order_status": "order.payment_processing",
+  "collection_type": "GO_TO_LAB",
+  "status_history": [
+    {
+      "status": "order.payment_processing",
+      "changed_at": "2026-07-23T17:33:45Z"
+    },
+    {
+      "status": "results.awaiting_sample",
+      "order_item_id": "338735426810802179",
+      "changed_at": "2026-07-23T17:33:45Z"
+    }
+  ]
+}

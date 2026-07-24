@@ -1,0 +1,925 @@
+{
+  "entry": [
+    {
+      "fullUrl": "DiagnosticReport/dr-252848348019728387",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "FERR",
+              "display": "FERR",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            },
+            {
+              "code": "FOLA",
+              "display": "FOLA",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            },
+            {
+              "code": "LFT",
+              "display": "LFT",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ]
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "id": "dr-252848348019728387",
+        "issued": "1970-01-01T00:29:24+00:00",
+        "performer": [
+          {
+            "display": "Thriva Lab",
+            "reference": "Organization/SupplierID/1"
+          }
+        ],
+        "resourceType": "DiagnosticReport",
+        "result": [
+          {
+            "display": "FERR",
+            "reference": "Observation/Observation/obs-252848348019728387-FERR"
+          },
+          {
+            "display": "FOLA",
+            "reference": "Observation/Observation/obs-252848348019728387-FOLA"
+          },
+          {
+            "display": "ALB",
+            "reference": "Observation/Observation/obs-252848348019728387-ALB"
+          },
+          {
+            "display": "ALP",
+            "reference": "Observation/Observation/obs-252848348019728387-ALP"
+          },
+          {
+            "display": "ALT",
+            "reference": "Observation/Observation/obs-252848348019728387-ALT"
+          },
+          {
+            "display": "BILI",
+            "reference": "Observation/Observation/obs-252848348019728387-BILI"
+          },
+          {
+            "display": "GGT",
+            "reference": "Observation/Observation/obs-252848348019728387-GGT"
+          },
+          {
+            "display": "GLOB",
+            "reference": "Observation/Observation/obs-252848348019728387-GLOB"
+          },
+          {
+            "display": "PROT",
+            "reference": "Observation/Observation/obs-252848348019728387-PROT"
+          },
+          {
+            "display": "PROL",
+            "reference": "Observation/Observation/obs-252848348019728387-PROL"
+          }
+        ],
+        "status": "final",
+        "subject": {
+          "display": "John Tan",
+          "reference": "Patient/Patient/252848355103907840"
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-FERR",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "FERR",
+              "display": "FERR",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "FERR"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "not_escalated"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-FERR",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "not_escalated",
+                "display": "not_escalated",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 30
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Low"
+          },
+          {
+            "high": {
+              "value": 300
+            },
+            "low": {
+              "value": 30
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 300
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "microgram/L",
+          "value": 70
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-FOLA",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "FOLA",
+              "display": "FOLA",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "FOLA"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "not_escalated"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-FOLA",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "not_escalated",
+                "display": "not_escalated",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 10
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Low"
+          },
+          {
+            "high": {
+              "value": 45
+            },
+            "low": {
+              "value": 10
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 45
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "nmol/L",
+          "value": 30
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-ALB",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "ALB",
+              "display": "ALB",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "ALB"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "not_escalated"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-ALB",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "not_escalated",
+                "display": "not_escalated",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 35
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Low"
+          },
+          {
+            "high": {
+              "value": 50
+            },
+            "low": {
+              "value": 35
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 50
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "g/L",
+          "value": 40
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-ALP",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "ALP",
+              "display": "ALP",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "ALP"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "not_escalated"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-ALP",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "not_escalated",
+                "display": "not_escalated",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 30
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Low"
+          },
+          {
+            "high": {
+              "value": 130
+            },
+            "low": {
+              "value": 30
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 130
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "IU/L",
+          "value": 40
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-ALT",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "ALT",
+              "display": "ALT",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "ALT"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "not_escalated"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-ALT",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "not_escalated",
+                "display": "not_escalated",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 45
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 45
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "IU/L",
+          "value": 17
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-BILI",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "BILI",
+              "display": "BILI",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "BILI"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "not_escalated"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-BILI",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "not_escalated",
+                "display": "not_escalated",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 21
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 21
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "micromol/L",
+          "value": 10
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-GGT",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "GGT",
+              "display": "GGT",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "GGT"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "not_escalated"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-GGT",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "not_escalated",
+                "display": "not_escalated",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 55
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 55
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "IU/L",
+          "value": 20
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-GLOB",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "GLOB",
+              "display": "GLOB",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "GLOB"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "not_escalated"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-GLOB",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "not_escalated",
+                "display": "not_escalated",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 19
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Low"
+          },
+          {
+            "high": {
+              "value": 35
+            },
+            "low": {
+              "value": 19
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 35
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "g/L",
+          "value": 25
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-PROT",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "PROT",
+              "display": "PROT",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "PROT"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "not_escalated"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-PROT",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "not_escalated",
+                "display": "not_escalated",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 60
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Low"
+          },
+          {
+            "high": {
+              "value": 80
+            },
+            "low": {
+              "value": 60
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 80
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "g/L",
+          "value": 70
+        }
+      }
+    },
+    {
+      "fullUrl": "Observation/obs-252848348019728387-PROL",
+      "resource": {
+        "code": {
+          "coding": [
+            {
+              "code": "PROL",
+              "display": "PROL",
+              "system": "https://api.thriva.io/fhir/CodeSystem/biomarkers"
+            }
+          ],
+          "text": "PROL"
+        },
+        "effectiveDateTime": "1970-01-01T00:29:24+00:00",
+        "extension": [
+          {
+            "url": "https://api.thriva.io/fhir/extensions/escalation-level",
+            "valueCode": "medium"
+          },
+          {
+            "extension": [
+              {
+                "url": "level",
+                "valueCode": "medium"
+              },
+              {
+                "url": "status",
+                "valueCode": "no_acknowledgment_required"
+              }
+            ],
+            "url": "https://api.thriva.io/fhir/extensions/escalation"
+          }
+        ],
+        "id": "obs-252848348019728387-PROL",
+        "interpretation": [
+          {
+            "coding": [
+              {
+                "code": "medium",
+                "display": "medium",
+                "system": "https://api.thriva.io/fhir/CodeSystem/escalation-level"
+              }
+            ]
+          }
+        ],
+        "issued": "1970-01-01T00:29:24+00:00",
+        "referenceRange": [
+          {
+            "high": {
+              "value": 86
+            },
+            "low": {
+              "value": 0
+            },
+            "text": "Low"
+          },
+          {
+            "high": {
+              "value": 324
+            },
+            "low": {
+              "value": 86
+            },
+            "text": "Normal"
+          },
+          {
+            "low": {
+              "value": 324
+            },
+            "text": "High"
+          }
+        ],
+        "resourceType": "Observation",
+        "status": "final",
+        "subject": {
+          "reference": "Patient/Patient/252848355103907840"
+        },
+        "valueQuantity": {
+          "unit": "mU/L",
+          "value": 1002
+        }
+      }
+    },
+    {
+      "fullUrl": "Patient/252848355103907840",
+      "resource": {
+        "address": [
+          {
+            "city": "",
+            "country": "",
+            "line": ["", ""],
+            "postalCode": "",
+            "state": ""
+          }
+        ],
+        "birthDate": "1970-01-01",
+        "gender": "male",
+        "id": "252848355103907840",
+        "name": [
+          {
+            "family": "Tan",
+            "given": ["John"]
+          }
+        ],
+        "resourceType": "Patient",
+        "telecom": [
+          {
+            "system": "email",
+            "value": "john.tan@example.com"
+          },
+          {
+            "system": "phone",
+            "value": "+441234567890"
+          }
+        ]
+      }
+    }
+  ],
+  "resourceType": "Bundle",
+  "timestamp": "1970-01-01T00:29:24+00:00",
+  "type": "collection"
+}

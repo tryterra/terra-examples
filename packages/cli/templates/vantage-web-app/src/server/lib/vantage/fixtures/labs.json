@@ -1,0 +1,252 @@
+{
+  "labs": [
+    {
+      "code": "T2O",
+      "name": "Quest Diagnostics - NYC-26th St - Employer Drug Testing Not Offered",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "160 W 26Th St",
+        "address_line_2": "Ste 201",
+        "city": "New York",
+        "administrative_area": "NY",
+        "postal_code": "10001-6975"
+      },
+      "phone": "646-336-8031",
+      "hours": {
+        "Friday": "8:00 am-5:00 pm",
+        "Monday": "8:00 am-5:00 pm",
+        "Saturday": "8:00 am-12:00 pm",
+        "Thursday": "8:00 am-5:00 pm",
+        "Tuesday": "8:00 am-5:00 pm",
+        "Wednesday": "8:00 am-5:00 pm"
+      },
+      "latitude": 40.74575309999,
+      "longitude": -73.993908,
+      "scheduling": true,
+      "distance": 0.18
+    },
+    {
+      "code": "CE9",
+      "name": "Quest Diagnostics - New York East 22nd Street - Employer Drug Testing Not Offered",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "21 E 22nd St",
+        "address_line_2": "1st Fl",
+        "city": "New York",
+        "administrative_area": "NY",
+        "postal_code": "10010-5332"
+      },
+      "phone": "212-228-7788",
+      "hours": {
+        "Friday": "8:00 am-4:30 pm",
+        "Monday": "8:00 am-4:30 pm",
+        "Saturday": "9:00 am-12:00 pm",
+        "Thursday": "8:00 am-4:30 pm",
+        "Tuesday": "8:00 am-4:30 pm",
+        "Wednesday": "8:00 am-4:30 pm"
+      },
+      "latitude": 40.7403494,
+      "longitude": -73.9883317999,
+      "scheduling": true,
+      "distance": 0.63
+    },
+    {
+      "code": "QWE",
+      "name": "Quest Diagnostics - New York West 14th Street",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "314 W 14Th St",
+        "address_line_2": "3Rd Fl",
+        "city": "New York",
+        "administrative_area": "NY",
+        "postal_code": "10014-5002"
+      },
+      "phone": "917-748-6887",
+      "hours": {
+        "Friday": "8:00 am-4:00 pm",
+        "Monday": "8:00 am-5:00 pm",
+        "Saturday": "8:00 am-12:00 pm",
+        "Thursday": "8:00 am-5:00 pm",
+        "Tuesday": "8:00 am-5:00 pm",
+        "Wednesday": "8:00 am-5:00 pm"
+      },
+      "latitude": 40.7399158,
+      "longitude": -74.0034972999,
+      "scheduling": true,
+      "distance": 0.77
+    },
+    {
+      "code": "Y6M",
+      "name": "Quest Diagnostics - 268 3rd Avenue",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "268 3Rd Ave",
+        "city": "New York",
+        "administrative_area": "NY",
+        "postal_code": "10010-6313"
+      },
+      "phone": "646-933-8014",
+      "hours": {
+        "Friday": "8:00 am-4:00 pm",
+        "Monday": "8:00 am-4:00 pm",
+        "Saturday": "",
+        "Thursday": "8:00 am-4:00 pm",
+        "Tuesday": "8:00 am-4:00 pm",
+        "Wednesday": "8:00 am-4:00 pm"
+      },
+      "latitude": 40.7379081,
+      "longitude": -73.9841338,
+      "scheduling": true,
+      "distance": 0.89
+    },
+    {
+      "code": "KWV",
+      "name": "Quest Diagnostics - New York West 57th Street ",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "331 W 57th St",
+        "city": "New York",
+        "administrative_area": "NY",
+        "postal_code": "10019-3101"
+      },
+      "phone": "212-757-4242",
+      "hours": {
+        "Friday": "8:00 am-4:00 pm",
+        "Monday": "8:00 am-4:00 pm",
+        "Saturday": "",
+        "Thursday": "8:00 am-4:00 pm",
+        "Tuesday": "8:00 am-4:00 pm",
+        "Wednesday": "8:00 am-4:00 pm"
+      },
+      "latitude": 40.7675922,
+      "longitude": -73.9843932,
+      "scheduling": true,
+      "distance": 1.43
+    },
+    {
+      "code": "SIX",
+      "name": "Quest Diagnostics - New York East 57th Street",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "115 E 57th St",
+        "address_line_2": "Ste 1530",
+        "city": "New York",
+        "administrative_area": "NY",
+        "postal_code": "10022-2049"
+      },
+      "phone": "212-909-8009",
+      "hours": {
+        "Friday": "8:00 am-4:00 pm",
+        "Monday": "8:00 am-4:00 pm",
+        "Saturday": "8:00 am-12:00 pm",
+        "Thursday": "8:00 am-4:00 pm",
+        "Tuesday": "8:00 am-4:00 pm",
+        "Wednesday": "8:00 am-4:00 pm"
+      },
+      "latitude": 40.7615618,
+      "longitude": -73.9701536,
+      "scheduling": true,
+      "distance": 1.56
+    },
+    {
+      "code": "YGO",
+      "name": "Quest Diagnostics - New York Centre Street",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "139 Centre St",
+        "address_line_2": "Ste 207",
+        "city": "New York",
+        "administrative_area": "NY",
+        "postal_code": "10013-4552"
+      },
+      "phone": "212-343-0242",
+      "hours": {
+        "Friday": "8:00 am-6:30 pm",
+        "Monday": "8:00 am-6:30 pm",
+        "Saturday": "8:00 am-4:00 pm",
+        "Thursday": "8:00 am-6:30 pm",
+        "Tuesday": "8:00 am-6:30 pm",
+        "Wednesday": "8:00 am-6:30 pm"
+      },
+      "latitude": 40.7174247,
+      "longitude": -74.0008579,
+      "scheduling": true,
+      "distance": 2.16
+    },
+    {
+      "code": "NNY",
+      "name": "Quest Diagnostics - New York East 76th Street",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "65 E 76th St",
+        "address_line_2": "PROFESSIONAL APT GR-G",
+        "city": "New York",
+        "administrative_area": "NY",
+        "postal_code": "10021-1844"
+      },
+      "phone": "212-794-6400",
+      "hours": {
+        "Friday": "8:00 am-4:00 pm",
+        "Monday": "8:00 am-4:00 pm",
+        "Saturday": "8:00 am-12:00 pm",
+        "Thursday": "8:00 am-4:00 pm",
+        "Tuesday": "8:00 am-4:00 pm",
+        "Wednesday": "8:00 am-4:00 pm"
+      },
+      "latitude": 40.774066,
+      "longitude": -73.962828,
+      "scheduling": true,
+      "distance": 2.43
+    },
+    {
+      "code": "BGP",
+      "name": "Quest Diagnostics - Brooklyn Greenpoint ",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "147 Greenpoint Ave",
+        "address_line_2": "1st Fl",
+        "city": "Brooklyn",
+        "administrative_area": "NY",
+        "postal_code": "11222-2301"
+      },
+      "phone": "718-383-6785",
+      "hours": {
+        "Friday": "7:00 am-4:00 pm",
+        "Monday": "7:00 am-4:00 pm",
+        "Saturday": "7:00 am-1:00 pm",
+        "Thursday": "7:00 am-4:00 pm",
+        "Tuesday": "7:00 am-4:00 pm",
+        "Wednesday": "7:00 am-4:00 pm"
+      },
+      "latitude": 40.7303539,
+      "longitude": -73.9538757,
+      "scheduling": true,
+      "distance": 2.46
+    },
+    {
+      "code": "FTJ",
+      "name": "Quest Diagnostics - West New York  ",
+      "address": {
+        "country_code": "US",
+        "address_line_1": "4914-4922 Kennedy Blvd",
+        "address_line_2": "Ste 206",
+        "city": "West New York",
+        "administrative_area": "NJ",
+        "postal_code": "07093-5590"
+      },
+      "phone": "201-974-1725",
+      "hours": {
+        "Friday": "6:00 am-2:30 pm",
+        "Monday": "6:00 am-2:30 pm",
+        "Saturday": "7:00 am-1:00 pm",
+        "Thursday": "6:00 am-2:30 pm",
+        "Tuesday": "6:00 am-2:20 pm",
+        "Wednesday": "6:00 am-2:30 pm"
+      },
+      "latitude": 40.7832752,
+      "longitude": -74.0223973999,
+      "scheduling": true,
+      "distance": 2.84
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+[
+  {
+    "id": 100011,
+    "product_id": 10001,
+    "product_type_id": 1,
+    "variant_name": "Standard Kit",
+    "variant_defining_attrs": {
+      "panel": "Core",
+      "turnaround_days": "2-3"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Good starter panel"
+    },
+    "variant_availability": 1,
+    "price_cents": 3999,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["GB"]
+  },
+  {
+    "id": 100012,
+    "product_id": 10001,
+    "product_type_id": 1,
+    "variant_name": "Comprehensive Kit",
+    "variant_defining_attrs": {
+      "panel": "Advanced",
+      "turnaround_days": "2-3"
+    },
+    "descriptive_attrs_override": {
+      "notes": "More biomarkers included"
+    },
+    "variant_availability": 1,
+    "price_cents": 6999,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["GB"]
+  }
+]

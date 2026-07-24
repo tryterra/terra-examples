@@ -1,0 +1,62 @@
+{
+  "order_id": "338445694641188864",
+  "client_id": "example-dev-id",
+  "client_order_reference_id": "EXAPP-mrwncqu3-mjbpeu",
+  "recipient": {
+    "id": "338445694641188865",
+    "first_name": "Alexandra",
+    "last_name": "Harper",
+    "date_of_birth": "1990-05-15",
+    "gender_at_birth": "male",
+    "email": "alexandra.harper@example.com",
+    "phone_number": "+447911123456"
+  },
+  "shipping_address": null,
+  "requested_lab_address": {
+    "country_code": "US",
+    "address_line_1": "21 E 22nd St",
+    "address_line_2": "1st Fl",
+    "city": "New York",
+    "administrative_area": "NY",
+    "postal_code": "10010-5332"
+  },
+  "confirmed_lab": null,
+  "items": [
+    {
+      "order_id": "338445694641188864",
+      "order_item_id": "338445694641188867",
+      "variant_id": "100021",
+      "product_type_id": "1",
+      "price_per_item_cents": 4999,
+      "quantity": 1,
+      "currency": 840,
+      "results_status": "results.results_ready",
+      "item_status": 1,
+      "test_taker_ids": ["338445719328862208"],
+      "supplier_item_id": "338445719106564096"
+    }
+  ],
+  "order_financials": {
+    "discount_cents": 0,
+    "total_cents": 4999,
+    "currency": 840
+  },
+  "order_status": "order.processing",
+  "collection_type": "GO_TO_LAB",
+  "status_history": [
+    {
+      "status": "results.results_ready",
+      "order_item_id": "338445694641188867",
+      "changed_at": "2026-07-22T22:23:07Z"
+    },
+    {
+      "status": "order.processing",
+      "changed_at": "2026-07-22T22:22:27Z"
+    },
+    {
+      "status": "results.awaiting_sample",
+      "order_item_id": "338445694641188867",
+      "changed_at": "2026-07-22T22:22:27Z"
+    }
+  ]
+}
