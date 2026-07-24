@@ -1,0 +1,245 @@
+[
+  {
+    "id": 100021,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Basic Metabolic Panel",
+    "variant_defining_attrs": {
+      "panel": "Basic",
+      "turnaround_days": "3-5"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Standard metabolic markers"
+    },
+    "variant_availability": 1,
+    "price_cents": 4999,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100031,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Heart Health",
+    "variant_defining_attrs": {
+      "biomarkers": ["Lipids", "hs-CRP", "HbA1c"],
+      "panel": "Heart Health",
+      "turnaround_days": "3-5"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Comprehensive heart health screening"
+    },
+    "variant_availability": 1,
+    "price_cents": 9900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100041,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Inflammation",
+    "variant_defining_attrs": {
+      "biomarkers": ["hs-CRP", "Vitamin D"],
+      "panel": "Inflammation",
+      "turnaround_days": "3-5"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Inflammation marker testing"
+    },
+    "variant_availability": 1,
+    "price_cents": 7900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100051,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Diabetes & Metabolic",
+    "variant_defining_attrs": {
+      "biomarkers": ["Lipids", "HbA1c", "Glucose", "Insulin", "Creatinine"],
+      "panel": "Diabetes & Metabolic",
+      "turnaround_days": "3-5"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Comprehensive metabolic health screening"
+    },
+    "variant_availability": 1,
+    "price_cents": 12900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100061,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Female Hormone Panel",
+    "variant_defining_attrs": {
+      "biomarkers": [
+        "AMH",
+        "DHEA-S",
+        "Estradiol (E2)",
+        "FSH",
+        "LH",
+        "Prolactin",
+        "Total Testosterone",
+        "TSH"
+      ],
+      "panel": "Female Hormone",
+      "turnaround_days": "5-7"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Comprehensive female hormone profile"
+    },
+    "variant_availability": 1,
+    "price_cents": 14900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100071,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Male Hormone Panel",
+    "variant_defining_attrs": {
+      "biomarkers": [
+        "Cortisol",
+        "Estradiol",
+        "Free T4",
+        "LH",
+        "PSA",
+        "Total Testosterone"
+      ],
+      "panel": "Male Hormone",
+      "turnaround_days": "5-7"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Comprehensive male hormone profile"
+    },
+    "variant_availability": 1,
+    "price_cents": 14900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100081,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Cortisol Curve",
+    "variant_defining_attrs": {
+      "biomarkers": ["Cortisol x4"],
+      "panel": "Cortisol Curve",
+      "turnaround_days": "5-7"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Four-point cortisol testing throughout the day"
+    },
+    "variant_availability": 1,
+    "price_cents": 9900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100091,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Thyroid Function",
+    "variant_defining_attrs": {
+      "biomarkers": ["TSH", "Free T3", "Free T4", "TPOab"],
+      "panel": "Thyroid Function",
+      "turnaround_days": "3-5"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Complete thyroid function assessment"
+    },
+    "variant_availability": 1,
+    "price_cents": 8900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100101,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Kidney Function",
+    "variant_defining_attrs": {
+      "biomarkers": ["Creatinine", "eGFR", "uACR"],
+      "panel": "Kidney Function",
+      "turnaround_days": "3-5"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Kidney health markers"
+    },
+    "variant_availability": 1,
+    "price_cents": 6900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100111,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Liver Function",
+    "variant_defining_attrs": {
+      "biomarkers": ["ALT", "Albumin", "AST", "Total Bilirubin"],
+      "panel": "Liver Function",
+      "turnaround_days": "3-5"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Liver health assessment"
+    },
+    "variant_availability": 1,
+    "price_cents": 6900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100121,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Vitamin B Panel",
+    "variant_defining_attrs": {
+      "biomarkers": ["B9", "B12"],
+      "panel": "Vitamin B",
+      "turnaround_days": "3-5"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Vitamin B9 and B12 levels"
+    },
+    "variant_availability": 1,
+    "price_cents": 5900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  },
+  {
+    "id": 100131,
+    "product_id": 10002,
+    "product_type_id": 1,
+    "variant_name": "Vitamin D",
+    "variant_defining_attrs": {
+      "biomarkers": ["Vitamin D"],
+      "panel": "Vitamin D",
+      "turnaround_days": "3-5"
+    },
+    "descriptive_attrs_override": {
+      "notes": "Vitamin D level testing"
+    },
+    "variant_availability": 1,
+    "price_cents": 4900,
+    "currency": 840,
+    "available_collection_types": ["AT_HOME"],
+    "supported_ship_to_countries": ["US"]
+  }
+]

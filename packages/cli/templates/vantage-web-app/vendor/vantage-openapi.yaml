@@ -1,0 +1,2319 @@
+openapi: 3.1.0
+info:
+  contact: {}
+  description: Authenticate with your Terra API credentials — HTTP Basic with your Terra **dev-id** as the username and your **API key** as the password (the `dev-id` + `x-api-key` header pair is also accepted).
+  title: Terra Vantage API
+  version: "1.0"
+servers:
+  - url: https://vantage.tryterra.co
+paths:
+  /api/v1/orders/activate:
+    get:
+      summary: Serve kit activation page
+      tags:
+        - activation
+      security: []
+      description: Returns an HTML page for end users to activate their test kit and provide test-taker information
+      parameters:
+        - name: kit_id
+          in: query
+          description: Supplier Kit ID from test kit packaging
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HTML activation form
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Invalid kit ID
+          content:
+            text/html:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            text/html:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    post:
+      summary: Activate a test kit
+      tags:
+        - activation
+      security: []
+      description: Registers test-taker details with the supplier and updates order item status. This endpoint is called after the test-taker receives their kit and provides their information.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivationContextDTO"
+        description: Activation details including test-taker info
+        required: true
+      responses:
+        "200":
+          description: Kit activated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActivateKitResponse"
+        "400":
+          description: Invalid request body or kit already activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Kit not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "409":
+          description: Kit already activated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "503":
+          description: Supplier service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/clients/webhook-url:
+    get:
+      summary: Get the registered webhook URL
+      tags:
+        - clients
+      description: The currently registered webhook destination for this environment ("" when none).
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: Current destination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    patch:
+      summary: Update webhook URL
+      tags:
+        - clients
+      description: |
+        Update or clear the webhook URL for the authenticated client. The
+        webhook URL must use HTTPS if provided, or can be empty to clear it.
+        Note this means webhooks will no longer be sent to your previous
+        endpoint.
+
+        Deliveries to your endpoint carry an `X-Terra-Signature` header of the
+        form `t=<timestamp>,v1=<hex-hmac>` where `t` is the send time in Unix
+        seconds and `v1` is `HMAC-SHA256(secret, t + "." + payload)` — the
+        same scheme as all Terra webhooks. Verify by recomputing the HMAC
+        from the received `t` and the raw body.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateWebhookUrlRequest"
+        description: Webhook URL update request
+        required: true
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: Webhook URL updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientResponse"
+        "400":
+          description: Bad request - invalid URL format or validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Unauthorized - invalid client credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+        "404":
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/orders:
+    get:
+      summary: List orders
+      tags:
+        - orders
+      description: Keyset-paginated index of your orders, newest first. Pass the returned next_cursor to fetch the following page; absence of next_cursor means the last page.
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+        - name: cursor
+          in: query
+          required: false
+          description: order_id from the previous page's next_cursor
+          schema:
+            type: string
+            example: "333410942627700736"
+        - name: since
+          in: query
+          required: false
+          description: Only orders created at/after this RFC3339 timestamp.
+          schema:
+            type: string
+            format: date-time
+        - name: missing
+          in: query
+          required: false
+          description: true = only delivered/completed orders with at least one item whose results aren't in yet (the overview's "missing results" set).
+          schema:
+            type: boolean
+            default: false
+        - name: status
+          in: query
+          required: false
+          description: Filter by order status string (e.g. order.processing)
+          schema:
+            type: string
+        - name: collection_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - AT_HOME
+              - GO_TO_LAB
+      responses:
+        "200":
+          description: One page of orders
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListOrdersResponse"
+        "400":
+          description: Invalid pagination or filter parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Missing or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+    post:
+      summary: Create a new order
+      tags:
+        - orders
+      description: Create a new blood, DNA, or device test order. Products that are disabled in your catalog cannot be ordered and are rejected with 403. Payment is authorized then captured as part of order creation; if authorization fails, nothing is created and a 402 is returned.
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Optional Stripe-style idempotency key. Replaying the same key with the same request body returns the original order without creating or charging again; the same key with a different body returns 409.
+          schema:
+            type: string
+            maxLength: 255
+            example: a1b2c3d4-order-2024-001
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+        description: Order creation request
+        required: true
+      responses:
+        "201":
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateOrderResponse"
+        "400":
+          description: Bad request - invalid JSON or validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateOrderValidationError"
+        "402":
+          description: Payment authorization failed. Nothing was created — no supplier order and no charge. Retry after resolving the payment method.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentRequiredProblem"
+        "403":
+          description: A requested product is not enabled in your catalog
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "409":
+          description: The Idempotency-Key was already used with a different request body, or a request with this key is still in progress.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/orders/{orderID}:
+    get:
+      summary: Get order by order ID
+      tags:
+        - orders
+      description: Returns complete order details including items, recipient, and status
+      parameters:
+        - name: orderID
+          in: path
+          description: Order ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: Successfully retrieved order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetOrderResponse"
+        "400":
+          description: Invalid order ID format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Unauthorized - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+        "404":
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/orders/{orderID}/simulate:
+    post:
+      summary: Simulate an order lifecycle event (Testing environment only)
+      tags:
+        - orders
+      description: Drives one lifecycle event on your order exactly as a supplier update would — status history is recorded and the corresponding signed webhook is delivered to your registered destination. Only valid forward transitions are accepted. results_ready also stores a sample result so the download and acknowledge flows work end to end. The production environment refuses with 403.
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: orderID
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "333410942627700736"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SimulateOrderRequest"
+      responses:
+        "200":
+          description: Event applied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimulateOrderResponse"
+        "400":
+          description: Invalid order id, request body, order_item_id, or event
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "403":
+          description: Not available in the production environment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "404":
+          description: Order (or order item) not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "422":
+          description: Event is not a valid transition from the current status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimulateTransitionProblem"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/products:
+    get:
+      summary: List all product types
+      tags:
+        - products
+      description: Returns all available diagnostic test categories (e.g., Blood Tests, DNA Tests)
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: Successfully retrieved product types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductType"
+        "401":
+          description: Unauthorized - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/products/selection:
+    put:
+      summary: Set catalog selection
+      tags:
+        - products
+      description: "Curate which products your own catalog reads return. Full-set write: listed products become enabled, every other product disabled. With no selection saved, everything is enabled; products added to the global catalog after your last save default to enabled until you save again. Disabled products are excluded from catalog reads and cannot be ordered (403)."
+      security:
+        - BasicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCatalogSelectionRequest"
+      responses:
+        "200":
+          description: Selection saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateCatalogSelectionResponse"
+        "400":
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Missing or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/products/{id}:
+    get:
+      summary: Get products by type ID
+      tags:
+        - products
+      description: Returns all products within a specific product type category
+      parameters:
+        - name: show_all
+          in: query
+          required: false
+          description: Return the full catalog with per-product enabled flags (curation view).
+          schema:
+            type: boolean
+            default: false
+        - name: id
+          in: path
+          description: Product Type ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: Successfully retrieved products. An existing product type with no available products returns an empty array.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+        "400":
+          description: Invalid product type ID format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Unauthorized - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+        "404":
+          description: Product type not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Product type id 100 not found
+                  instance:
+                    type: string
+                    example: /api/v1/products/100
+                  status:
+                    type: integer
+                    example: 404
+                  title:
+                    type: string
+                    example: Resource Not Found
+                  type:
+                    type: string
+                    example: https://api.terra-diagnostics.com/errors/not-found-error
+                required:
+                  - detail
+                  - instance
+                  - status
+                  - title
+                  - type
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/products/{id}/variants:
+    get:
+      summary: Get product variants by product ID
+      tags:
+        - products
+      description: Returns all available variants/options for a specific diagnostic test product (e.g., different panel sizes, customizations)
+      parameters:
+        - name: show_all
+          in: query
+          required: false
+          description: Include variants of catalog-disabled products (curation view). Disabled products remain non-orderable regardless.
+          schema:
+            type: boolean
+            default: false
+        - name: id
+          in: path
+          description: Product ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: Successfully retrieved variants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductVariant"
+        "400":
+          description: Invalid product ID format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Unauthorized - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+        "404":
+          description: No product variants were found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Product variant id 100 not found
+                  instance:
+                    type: string
+                    example: /api/v1/products/100/variants
+                  status:
+                    type: integer
+                    example: 404
+                  title:
+                    type: string
+                    example: Resource Not Found
+                  type:
+                    type: string
+                    example: https://api.terra-diagnostics.com/errors/not-found-error
+                required:
+                  - detail
+                  - instance
+                  - status
+                  - title
+                  - type
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/results:
+    get:
+      summary: List results
+      tags:
+        - results
+      description: Keyset-paginated index of order items with result activity, newest first.
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+        - name: cursor
+          in: query
+          required: false
+          description: order_item_id from the previous page's next_cursor
+          schema:
+            type: string
+            example: "333410942627700737"
+        - name: status
+          in: query
+          required: false
+          description: Filter by results status string (e.g. results.results_ready)
+          schema:
+            type: string
+      responses:
+        "200":
+          description: One page of results
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListResultsResponse"
+        "400":
+          description: Invalid pagination or filter parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Missing or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/results/{orderItemID}:
+    get:
+      summary: Get presigned URL for test results
+      tags:
+        - results
+      description: "Returns a time-limited presigned URL to download normalized test results in FHIR format (JSON). The URL is valid for 15 minutes. Note: Every orderItemID can only be associated with maximum 1 panel, hence results can be uniquely identified by orderItemID."
+      parameters:
+        - name: orderItemID
+          in: path
+          description: Order Item ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: test_taker_id
+          in: query
+          description: Test Taker ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: Successfully generated download URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetResultsURLResponse"
+        "400":
+          description: Invalid or missing order item ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Unauthorized - invalid client credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+        "404":
+          description: Results not found for this order item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/results/{orderItemID}/acknowledge:
+    post:
+      summary: Acknowledge results receipt
+      tags:
+        - results
+      description: Records the end user's affirmative confirmation that they have received and viewed their results (Schedule C §C6A). Must be triggered by an explicit end-user action (e.g. a checkbox or button in the client's UI) — never automatically by the backend on retrieval or delivery. Required for compliance and audit trails.
+      parameters:
+        - name: orderItemID
+          in: path
+          description: Order Item ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - name: test_taker_id
+          in: query
+          description: Test Taker ID
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      security:
+        - BasicAuth: []
+      responses:
+        "200":
+          description: Results acknowledged successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AcknowledgeResultsResponse"
+        "400":
+          description: Invalid order item ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Unauthorized - invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+        "404":
+          description: Order item not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/labs:
+    get:
+      summary: List nearby lab draw sites
+      tags:
+        - labs
+      description: Returns nearby Patient Service Centers (lab draw sites) for a US zip code, used when placing a GO_TO_LAB order.
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: zip_code
+          in: query
+          required: true
+          description: 5-digit US zip (optionally with 4-digit suffix)
+          schema:
+            type: string
+            example: "10001"
+      responses:
+        "200":
+          description: Nearby lab draw sites
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListLabsResponse"
+        "400":
+          description: Missing or invalid zip code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Missing or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/overview:
+    get:
+      summary: Analytics overview
+      tags:
+        - analytics
+      description: "Client-scoped analytics summary for a time window: order totals with a by-status breakdown, results in vs. still missing, and webhook failures with a daily series."
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: since
+          in: query
+          required: false
+          description: Start of the window (RFC3339). Defaults to until minus 7 days.
+          schema:
+            type: string
+            format: date-time
+        - name: until
+          in: query
+          required: false
+          description: End of the window (RFC3339). Defaults to now.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Analytics summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OverviewResponse"
+        "400":
+          description: Invalid time window
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Missing or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+  /api/v1/webhook-deliveries:
+    get:
+      summary: List webhook delivery outcomes
+      tags:
+        - analytics
+      description: Client-scoped keyset list of terminal webhook delivery outcomes, newest first. Use outcome=failed to see only permanently-failed deliveries.
+      security:
+        - BasicAuth: []
+      parameters:
+        - name: outcome
+          in: query
+          required: false
+          description: One delivery outcome, or "failed" (rejected|invalid|dead_lettered).
+          schema:
+            type: string
+            enum:
+              - delivered
+              - rejected
+              - invalid
+              - dead_lettered
+              - replayed
+              - failed
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 25
+        - name: cursor
+          in: query
+          required: false
+          description: event_id from the previous page's next_cursor
+          schema:
+            type: string
+            example: "333410942627700737"
+      responses:
+        "200":
+          description: One page of delivery outcomes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookDeliveriesResponse"
+        "400":
+          description: Invalid pagination or filter parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "401":
+          description: Missing or invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProblemDetail"
+webhooks:
+  order.status_changed:
+    post:
+      operationId: webhookOrderStatusChanged
+      security: []
+      summary: Order fulfilment status changed
+      description: |-
+        Sent when an order's fulfilment status changes. `data.status` uses the same `order.*` vocabulary as REST reads of the order.
+
+        Deliveries carry `X-Terra-Signature: t=<unix_seconds>,v1=<hex>` where `v1 = HMAC-SHA256(signing_secret, "<t>.<raw_body>")` — verify against the raw body before trusting the payload — plus `X-Terra-Trace-Id` (the event_id). Delivery is at-least-once: dedupe on `event_id`. On network errors/408/429/5xx an event gets up to 5 HTTP attempts with exponential backoff (~1s, 2s, 4s, 8s) on first delivery, then single re-attempts with growing delays (5s doubling, capped at 10 minutes) for up to 10 deliveries in total — at most ~14 calls spread over ~30 minutes — before dead-lettering. Other 4xx responses are recorded as rejected and not retried at all.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusChangedEvent"
+      responses:
+        "200":
+          description: Return any 2xx quickly to acknowledge receipt.
+  order_item.results_status_change:
+    post:
+      operationId: webhookOrderItemResultsStatusChange
+      security: []
+      summary: Order item results status changed
+      description: |-
+        Sent when an order item's results status changes. `data.results_status` uses the `results.*` vocabulary shared with REST reads.
+
+        Signing, `X-Terra-Trace-Id`, at-least-once delivery, and retry semantics are identical to `order.status_changed` — see its description.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderItemResultsStatusChangedEvent"
+      responses:
+        "200":
+          description: Return any 2xx quickly to acknowledge receipt.
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+      description: |
+        Authenticate with your Terra API credentials: username = your Terra
+        `dev-id`, password = your Terra API key — the same credentials used for
+        every other Terra API. The header pair `dev-id` + `x-api-key` is also
+        accepted. Suspended credentials receive 403; accounts without the
+        Vantage entitlement receive 403 once entitlement enforcement is
+        enabled.
+  schemas:
+    ListOrdersResponse:
+      type: object
+      required:
+        - orders
+      properties:
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderSummary"
+        next_cursor:
+          type: string
+          description: Pass as ?cursor= for the next page; absent on the last page.
+          example: "333410942627700736"
+    OrderSummary:
+      type: object
+      required:
+        - order_id
+        - created_at
+        - collection_type
+        - order_status
+        - total_cents
+        - currency
+        - items
+      properties:
+        order_id:
+          type: string
+          example: "333410942627700736"
+        client_order_reference_id:
+          type: string
+          example: ORDER-2024-001
+        created_at:
+          type: string
+          format: date-time
+        collection_type:
+          type: string
+          enum:
+            - AT_HOME
+            - GO_TO_LAB
+        order_status:
+          type: string
+          example: order.payment_processing
+        total_cents:
+          type: integer
+          example: 5540
+        currency:
+          type: integer
+          description: ISO-4217 numeric
+          example: 840
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderSummaryItem"
+    OrderSummaryItem:
+      type: object
+      required:
+        - order_item_id
+        - variant_id
+        - item_status
+        - results_status
+      properties:
+        order_item_id:
+          type: string
+          example: "333410942627700737"
+        variant_id:
+          type: string
+          example: "100011"
+        product_name:
+          type: string
+          example: General Health
+        item_status:
+          type: integer
+          example: 1
+        results_status:
+          type: string
+          example: results.awaiting_sample
+        test_taker_id:
+          type: string
+          example: "333410942627700738"
+    ListResultsResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResultSummary"
+        next_cursor:
+          type: string
+          description: Pass as ?cursor= for the next page; absent on the last page.
+          example: "333410942627700737"
+    ResultSummary:
+      type: object
+      required:
+        - order_item_id
+        - order_id
+        - variant_id
+        - results_status
+        - is_acknowledged
+        - updated_at
+      properties:
+        order_item_id:
+          type: string
+          example: "333410942627700737"
+        order_id:
+          type: string
+          example: "333410942627700736"
+        variant_id:
+          type: string
+          example: "100011"
+        product_name:
+          type: string
+          example: General Health
+        results_status:
+          type: string
+          example: results.results_ready
+        is_acknowledged:
+          type: boolean
+        test_taker_id:
+          type: string
+          example: "333410942627700738"
+        updated_at:
+          type: string
+          format: date-time
+    ClientResponse:
+      type: object
+      properties:
+        client_id:
+          type: string
+          example: client_abc123
+        customer_id:
+          type: string
+          example: cust_xyz789
+        webhook_url:
+          type: string
+          example: https://your-domain.com/webhooks/terra
+    SimulateOrderRequest:
+      type: object
+      required:
+        - event
+      properties:
+        event:
+          type: string
+          description: Lifecycle event to apply.
+          enum:
+            - payment_complete
+            - payment_failed
+            - processing
+            - delayed
+            - cancelled
+            - delivery_fulfilled
+            - completed
+            - kit_activated
+            - sample_processing_in_lab
+            - sample_rejected
+            - partial_results_ready
+            - results_ready
+            - lab_processing_error
+            - escalation_raised
+        order_item_id:
+          type: string
+          description: Narrow a results event to one order item.
+          example: "333410942627700737"
+    SimulateOrderResponse:
+      type: object
+      required:
+        - order_id
+        - applied_event
+      properties:
+        order_id:
+          type: string
+          example: "333410942627700736"
+        applied_event:
+          type: string
+          example: delivery_fulfilled
+    UpdateCatalogSelectionRequest:
+      type: object
+      required:
+        - product_ids
+      properties:
+        product_ids:
+          type: array
+          description: Products to enable; everything else is disabled.
+          items:
+            type: string
+            example: "999888777"
+    UpdateCatalogSelectionResponse:
+      type: object
+      required:
+        - enabled_count
+      properties:
+        enabled_count:
+          type: integer
+          example: 12
+    UpdateWebhookUrlRequest:
+      type: object
+      properties:
+        webhook_url:
+          type: string
+          example: https://your-domain.com/webhooks/terra
+    AddressDTO:
+      description: Physical address for shipping test kits
+      type: object
+      properties:
+        address_line_1:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: 123 Baker Street
+        address_line_2:
+          type: string
+          maxLength: 100
+          example: Flat 4B
+        administrative_area:
+          type: string
+          maxLength: 50
+          example: Greater London
+        city:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: London
+        country_code:
+          type: string
+          description: ISO 3166-1 alpha-2 (e.g., "GB", "US")
+          example: GB
+        id:
+          type: integer
+          example: 987654321
+        is_validated:
+          type: boolean
+          example: true
+        postal_code:
+          type: string
+          example: NW1 6XE
+      required:
+        - address_line_1
+        - administrative_area
+        - city
+        - country_code
+        - postal_code
+    RecipientDTO:
+      description: The recipient who will receive the test kit and may or may not be the test-taker (supplier-dependent)
+      type: object
+      properties:
+        date_of_birth:
+          type: string
+          example: "1990-05-15"
+        email:
+          type: string
+          maxLength: 100
+          example: sarah.johnson@example.com
+        first_name:
+          type: string
+          maxLength: 50
+          example: Sarah
+        gender_at_birth:
+          type: string
+          enum:
+            - male
+            - female
+          example: female
+        id:
+          type: string
+          example: "123456789"
+        last_name:
+          type: string
+          maxLength: 50
+          example: Johnson
+        phone_number:
+          type: string
+          description: Full E.164 phone number as stored and dialed, including the "+" and country calling code (e.g. "+447911123456"). Leading zeros significant to the national number are preserved.
+          example: "+447911123456"
+      required:
+        - date_of_birth
+        - email
+        - first_name
+        - gender_at_birth
+        - last_name
+        - phone_number
+    RecipientRequestDTO:
+      description: Recipient on an order-creation request. phone_number is a single E.164 string; the separate country_code field was removed and is silently ignored if still sent.
+      type: object
+      properties:
+        date_of_birth:
+          type: string
+          example: "1990-05-15"
+        email:
+          type: string
+          maxLength: 100
+          example: sarah.johnson@example.com
+        first_name:
+          type: string
+          maxLength: 50
+          example: Sarah
+        gender_at_birth:
+          type: string
+          enum:
+            - male
+            - female
+          example: female
+        id:
+          type: string
+          example: "123456789"
+        last_name:
+          type: string
+          maxLength: 50
+          example: Johnson
+        phone_number:
+          type: string
+          description: 'Required, in E.164 format: a leading "+", the country calling code, then the national number (e.g. "+447911123456"). A bare national number or a separate country_code is rejected.'
+          example: "+447911123456"
+      required:
+        - date_of_birth
+        - email
+        - first_name
+        - gender_at_birth
+        - last_name
+        - phone_number
+    ProblemDetail:
+      description: Standard error response format following RFC 7807 specification
+      type: object
+      properties:
+        detail:
+          type: string
+          example: One or more required fields are missing or invalid
+        instance:
+          type: string
+          example: /orders/create
+        status:
+          type: integer
+          example: 400
+        title:
+          type: string
+          example: Validation Error
+        type:
+          type: string
+          example: https://terra.dev/errors/validation-error
+    SimulateTransitionProblem:
+      description: "422 returned by the simulate endpoint when the requested event is not a valid forward transition from the current status. The RFC 7807 problem fields plus the two fields a client needs to recover without a GET round-trip. (Flat rather than an allOf over ProblemDetail: the conformance gate seals declared objects, and sealed allOf branches reject each other's properties.)"
+      type: object
+      required:
+        - current_status
+        - valid_events
+      properties:
+        detail:
+          type: string
+          example: event "payment_complete" is not a valid transition from the order's current status
+        instance:
+          type: string
+          example: /orders/333410942627700736/simulate
+        status:
+          type: integer
+          example: 422
+        title:
+          type: string
+          example: Unprocessable Entity
+        type:
+          type: string
+          example: https://terra.dev/errors/business-logic-error
+        current_status:
+          type: string
+          description: The status the rejected event was evaluated against.
+          example: order.payment_complete
+        valid_events:
+          type: array
+          description: Events accepted from current_status, sorted.
+          items:
+            type: string
+          example:
+            - processing
+            - cancelled
+    PaymentRequiredProblem:
+      description: "402 returned by POST /orders when payment authorization fails. Nothing is created — no supplier order and no charge. The RFC 7807 problem fields plus a category the client can branch on. (Flat rather than an allOf over ProblemDetail: the conformance gate seals declared objects, and sealed allOf branches reject each other's properties.)"
+      type: object
+      required:
+        - category
+        - detail
+        - status
+        - title
+        - type
+      properties:
+        detail:
+          type: string
+          example: Payment could not be authorized for this order.
+        instance:
+          type: string
+          example: /api/v1/orders
+        status:
+          type: integer
+          example: 402
+        title:
+          type: string
+          example: Payment Required
+        type:
+          type: string
+          example: https://api.terra-diagnostics.com/errors/payment-required-error
+        category:
+          type: string
+          description: Failure class for programmatic branching.
+          example: payment_failed
+    AuthenticationError:
+      description: Authentication error response (401)
+      type: object
+      properties:
+        detail:
+          type: string
+          example: Invalid Credentials
+        instance:
+          type: string
+          example: ""
+        status:
+          type: integer
+          example: 401
+        title:
+          type: string
+          example: Authentication Required/Failed
+        type:
+          type: string
+          example: https://api.terra-diagnostics.com/errors/authentication-error
+      required:
+        - detail
+        - status
+        - title
+        - type
+    ActivateKitResponse:
+      description: Confirmation that kit was activated successfully
+      type: object
+      properties:
+        kit_id:
+          type: string
+          example: KIT123456789
+        message:
+          type: string
+          example: Kit activated successfully
+        success:
+          type: boolean
+          example: true
+    ActivationContextAddress:
+      description: Current address of the test-taker (may differ from shipping address)
+      type: object
+      properties:
+        address_line_1:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: 456 Oxford Street
+        address_line_2:
+          type: string
+          maxLength: 100
+          example: Apt 7C
+        administrative_area:
+          type: string
+          maxLength: 50
+          example: Greater Manchester
+        city:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: Manchester
+        country_code:
+          type: string
+          description: ISO 3166-1 alpha-2 (e.g., "GB", "US")
+          example: GB
+        postal_code:
+          type: string
+          example: M1 5GD
+      required:
+        - address_line_1
+        - administrative_area
+        - city
+        - country_code
+        - postal_code
+    ActivationContextRecipient:
+      description: Test-taker personal information (may differ from original recipient). The former country_code field was removed and is silently ignored if still sent.
+      type: object
+      properties:
+        date_of_birth:
+          type: string
+          example: "1985-03-20"
+        email:
+          type: string
+          example: john.smith@example.com
+        first_name:
+          type: string
+          example: John
+        gender_at_birth:
+          type: string
+          enum:
+            - male
+            - female
+          example: male
+        last_name:
+          type: string
+          example: Smith
+        phone_number:
+          type: string
+          description: 'Required, in E.164 format: a leading "+", the country calling code, then the national number (e.g. "+447911123456"). A bare national number or a separate country_code is rejected.'
+          example: "+447911123456"
+      required:
+        - date_of_birth
+        - email
+        - gender_at_birth
+        - phone_number
+    ActivationContextDTO:
+      description: Information provided by test-taker when activating their kit
+      type: object
+      properties:
+        address:
+          $ref: "#/components/schemas/ActivationContextAddress"
+        collection_date:
+          type: string
+          example: "2025-11-15T09:00:00Z"
+        recipient:
+          $ref: "#/components/schemas/ActivationContextRecipient"
+        supplier_kit_id:
+          type: string
+          example: KIT123456789
+      required:
+        - address
+    OrderItemRequest:
+      description: Individual product variant and quantity in an order
+      type: object
+      properties:
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 100
+          example: 1
+        variant_id:
+          type: string
+          minLength: 1
+          example: "555666777"
+      required:
+        - quantity
+        - variant_id
+    CreateOrderRequest:
+      description: Request body for creating a new diagnostic test order
+      type: object
+      properties:
+        client_order_reference_id:
+          description: Your unique order identifier that you generate, used for tracking and reconciliation. Not deduplicated server-side — retrying a create with the same value produces a second order.
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: ORDER-2024-001
+        collection_type:
+          type: string
+          enum:
+            - AT_HOME
+            - GO_TO_LAB
+          description: Determines the required address field — shipping_address for AT_HOME, requested_lab_address for GO_TO_LAB.
+        items:
+          description: Only need product_variant_id and quantity completely define what was ordered
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/OrderItemRequest"
+        recipient:
+          description: Details of the person who ordered. Depending on the supplier recipient is not necessarily the test-taker. Although some suppliers enforce this constraint on us.
+          allOf:
+            - $ref: "#/components/schemas/RecipientRequestDTO"
+        requested_lab_address:
+          $ref: "#/components/schemas/AddressDTO"
+        requested_lab:
+          $ref: "#/components/schemas/RequestedLab"
+        shipping_address:
+          $ref: "#/components/schemas/AddressDTO"
+      required:
+        - client_order_reference_id
+        - collection_type
+        - items
+        - recipient
+    OrderFinancialDTO:
+      description: Price breakdown including subtotal, tax, shipping, discounts
+      type: object
+      properties:
+        currency:
+          description: "@Description ISO 4217 format (e.g. 840 = USD)"
+          type: integer
+          example: 840
+        discount_cents:
+          type: integer
+          minimum: 0
+          example: 500
+        total_cents:
+          type: integer
+          minimum: 0
+          example: 10400
+      required:
+        - currency
+        - total_cents
+    OrderItemResponse:
+      description: Individual test kit or product in the order
+      type: object
+      properties:
+        currency:
+          type: integer
+          example: 840
+        item_status:
+          type: integer
+          example: 2
+        lab_tracking_number:
+          type: string
+          example: LAB987654321
+        order_id:
+          type: string
+          example: "123456789"
+        order_item_id:
+          type: string
+          example: "987654321"
+        price_per_item_cents:
+          type: integer
+          example: 9990
+        product_type_id:
+          type: string
+          example: "1"
+        test_taker_ids:
+          type: array
+          description: Test takers registered on this item (present once a kit is activated).
+          items:
+            type: string
+          example:
+            - "333410942627700738"
+        supplier_item_id:
+          type: string
+          description: Supplier-side item identifier (kit ID once assigned). Recoverable here even if the webhook that carried it was missed.
+          example: BXTWP00362
+        quantity:
+          type: integer
+          example: 1
+        results_status:
+          type: string
+          example: results.awaiting_sample
+        variant_id:
+          type: string
+          example: "555666777"
+      required:
+        - variant_id
+        - product_type_id
+        - price_per_item_cents
+        - quantity
+        - currency
+    CreateOrderResponse:
+      description: Response containing the created order details including tracking information
+      type: object
+      properties:
+        confirmed_lab_address:
+          allOf:
+            - $ref: "#/components/schemas/AddressDTO"
+          description: "For GO_TO_LAB orders: the bound draw site's address - the end user's selection when requested_lab was sent and verified, otherwise the nearest site to the requested lab address. Best-effort - null when resolution is unavailable; the requisition is typically accepted at any of the supplier network's sites."
+        confirmed_lab:
+          anyOf:
+            - $ref: "#/components/schemas/ConfirmedLab"
+            - type: "null"
+        estimated_delivery:
+          type: string
+          example: "2025-11-20"
+        order_id:
+          type: string
+          example: "123456789"
+        order_items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItemResponse"
+        order_status:
+          type: string
+          description: Current fulfilment status in the REST `order.*` vocabulary. New orders start at `order.payment_processing`.
+          example: order.payment_processing
+        recipient_id:
+          type: string
+          example: "987654321"
+        tracking_number:
+          type: string
+          example: TRK123456789GB
+      required:
+        - order_id
+        - recipient_id
+    GetOrderResponse:
+      description: Full order information including items, recipient, address, and financials
+      type: object
+      properties:
+        status_history:
+          type: array
+          description: Lifecycle timeline, newest first (order fulfilment + item results events).
+          items:
+            type: object
+            required:
+              - status
+              - changed_at
+            properties:
+              status:
+                type: string
+                example: order.processing
+              order_item_id:
+                type: string
+                example: "333410942627700737"
+              changed_at:
+                type: string
+                format: date-time
+              escalation_level:
+                type: string
+                example: high
+                description: Present only on escalation_raised entries.
+              acknowledgment_due_by:
+                type: string
+                format: date-time
+                description: Present only on escalation_raised entries.
+        client_id:
+          type: string
+          example: terra_client_abc123
+        client_order_reference_id:
+          type: string
+          example: ORDER-2024-001
+        collection_type:
+          type: string
+          example: AT_HOME
+        confirmed_lab_address:
+          $ref: "#/components/schemas/AddressDTO"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItemResponse"
+        order_financials:
+          $ref: "#/components/schemas/OrderFinancialDTO"
+        order_id:
+          type: string
+          example: "123456789"
+        order_status:
+          type: string
+          description: Current fulfilment status in the REST `order.*` vocabulary.
+          example: order.delivery_fulfilled
+        recipient:
+          $ref: "#/components/schemas/RecipientDTO"
+        requested_lab_address:
+          $ref: "#/components/schemas/AddressDTO"
+        confirmed_lab:
+          anyOf:
+            - $ref: "#/components/schemas/ConfirmedLab"
+            - type: "null"
+        requested_lab:
+          allOf:
+            - $ref: "#/components/schemas/RequestedLab"
+          description: Echo of the selection sent at create time - lets a retrieval-only consumer tell "selected but unbound" from "no selection made".
+        shipping_address:
+          $ref: "#/components/schemas/AddressDTO"
+      required:
+        - order_id
+        - client_id
+        - client_order_reference_id
+        - recipient
+        - shipping_address
+        - items
+        - order_financials
+        - collection_type
+    RequestedLab:
+      description: "GO_TO_LAB only: bind the order to a draw site chosen from GET /labs. code is the binding identity (row's code field); postal_code is a lookup hint (row's address.postal_code, ZIP+4 accepted - normalized to the 5-digit ZIP server-side; defaults to requested_lab_address.postal_code). Unknown codes are rejected with invalid_fields tag unknown_lab_code; if the lookup is temporarily unavailable the order is accepted unbound (confirmed_lab null)."
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          example: T2O
+        postal_code:
+          type: string
+          example: 10001-6975
+    ConfirmedLab:
+      description: The draw site this order is bound to - a GET /labs row minus its request-relative distance field. Null when no binding exists (no selection and nearest-site resolution unavailable, or selection accepted unbound during a lookup outage).
+      type: object
+      required:
+        - code
+        - name
+        - address
+      properties:
+        code:
+          type: string
+          example: T2O
+        name:
+          type: string
+          example: Quest Diagnostics - NYC-26th St
+        address:
+          $ref: "#/components/schemas/AddressDTO"
+        phone:
+          type: string
+          example: 212-555-0100
+        hours:
+          type: object
+          additionalProperties:
+            type: string
+        latitude:
+          type: number
+          example: 40.7448
+        longitude:
+          type: number
+          example: -73.9938
+        scheduling:
+          type: boolean
+          example: true
+    CreateOrderValidationError:
+      description: Validation error when creating an order
+      type: object
+      properties:
+        detail:
+          type: string
+          example: One or more required fields are missing or invalid
+        instance:
+          type: string
+          example: /api/v1/orders
+        status:
+          type: integer
+          example: 400
+        title:
+          type: string
+          example: Validation Failed
+        type:
+          type: string
+          example: https://api.terra-diagnostics.com/errors/validation-error
+        invalid_fields:
+          type: array
+          description: Per-field validation errors
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: PhoneNumber
+              message:
+                type: string
+                example: "country_code was removed; send phone_number in E.164 format: +447911123456"
+              tag:
+                type: string
+                example: e164
+              value:
+                type: string
+                example: "07911123456"
+        supported_ship_to_countries:
+          type: array
+          description: Present when the order was rejected for an unsupported country (tag unsupported_ship_to_country) - the ISO-3166 alpha-2 codes this test can be ordered in.
+          items:
+            type: string
+          example:
+            - GB
+      required:
+        - detail
+        - instance
+        - status
+        - title
+        - type
+    OrderStatusChangedEvent:
+      type: object
+      required:
+        - event_type
+        - event_id
+        - timestamp
+        - data
+      properties:
+        event_type:
+          type: string
+          const: order.status_changed
+        event_id:
+          type: string
+          description: Unique per event (64-bit id serialized as a string) — deduplicate on this. Equals the X-Terra-Trace-Id header.
+          example: "249956485092777984"
+        timestamp:
+          type: integer
+          description: Unix seconds when the event was sent.
+          example: 1763661470
+        data:
+          type: object
+          required:
+            - order_id
+            - status
+          properties:
+            order_id:
+              type: string
+              example: "333410942627700736"
+            status:
+              type: string
+              enum:
+                - order.payment_processing
+                - order.payment_complete
+                - order.payment_failed
+                - order.processing
+                - order.delayed
+                - order.cancelled
+                - order.completed
+                - order.delivery_fulfilled
+            tracking_number:
+              type: string
+              description: Present once delivery details are available.
+              example: KnD3d5PMZyq5ulNcWkrq
+            supplier_item_id:
+              type: string
+              description: Sandbox payloads only — the supplier-side kit ID.
+              example: "249602021676720128"
+    OrderItemResultsStatusChangedEvent:
+      type: object
+      required:
+        - event_type
+        - event_id
+        - timestamp
+        - data
+      properties:
+        event_type:
+          type: string
+          const: order_item.results_status_change
+        event_id:
+          type: string
+          description: Unique per event (64-bit id serialized as a string) — deduplicate on this. Equals the X-Terra-Trace-Id header.
+          example: "249958796259139584"
+        timestamp:
+          type: integer
+          description: Unix seconds when the event was sent.
+          example: 1763662021
+        data:
+          type: object
+          required:
+            - order_id
+            - order_item_id
+            - variant_id
+            - results_status
+            - test_taker
+          properties:
+            order_id:
+              type: string
+              example: "333410942627700736"
+            order_item_id:
+              type: string
+              example: "333410942627700737"
+            variant_id:
+              type: string
+              example: "100011"
+            results_status:
+              type: string
+              enum:
+                - results.kit_activated
+                - results.sample_processing_in_lab
+                - results.sample_rejected
+                - results.partial_results_ready
+                - results.results_ready
+                - results.lab_processing_error
+                - results.escalation_raised
+            test_taker:
+              type: object
+              required:
+                - test_taker_id
+                - first_name
+                - last_name
+                - email
+                - phone_number
+              properties:
+                test_taker_id:
+                  type: string
+                  example: "333410942627700738"
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                email:
+                  type: string
+                phone_number:
+                  type: string
+                  description: E.164 phone number
+                  example: "+447911123456"
+            escalation_level:
+              type: string
+              description: Present on escalation_raised.
+              enum:
+                - not_escalated
+                - very_low
+                - low
+                - medium
+                - high
+                - very_high
+            acknowledgment_due_by:
+              type: string
+              description: Present on escalation_raised — ISO 8601 deadline.
+              example: "2026-07-24T16:04:01Z"
+            failure_cause:
+              type: string
+              description: Present on sample_rejected.
+              example: blood contaminated
+    GetResultsURLResponse:
+      description: Response containing a presigned URL to download test results
+      type: object
+      properties:
+        download_url:
+          type: string
+          example: https://storage.googleapis.com/bucket/results/123.json?signature=abc123
+        expires_at:
+          type: string
+          example: "2025-10-23T18:00:00Z"
+        format:
+          type: string
+          enum:
+            - json
+          example: json
+    AcknowledgeResultsResponse:
+      description: Confirmation that results were acknowledged
+      type: object
+      properties:
+        status:
+          type: string
+          example: acknowledged
+    AvailabilityStatus:
+      type: integer
+      format: int32
+      enum:
+        - 0
+        - 1
+        - 2
+      x-enum-varnames:
+        - AvailabilityStatus_AVAILABILITY_STATUS_UNSPECIFIED
+        - AvailabilityStatus_AVAILABILITY_STATUS_IN_STOCK
+        - AvailabilityStatus_AVAILABILITY_STATUS_OUT_OF_STOCK
+    Currency:
+      type: integer
+      format: int32
+      enum:
+        - 0
+        - 840
+        - 978
+        - 826
+      x-enum-comments:
+        Currency_CURRENCY_EUR: Euro (ISO 4217)
+        Currency_CURRENCY_GBP: British Pound Sterling (ISO 4217)
+        Currency_CURRENCY_UNSPECIFIED: Required zero value for proto3
+        Currency_CURRENCY_USD: United States Dollar (ISO 4217)
+      x-enum-descriptions:
+        - Required zero value for proto3
+        - United States Dollar (ISO 4217)
+        - Euro (ISO 4217)
+        - British Pound Sterling (ISO 4217)
+      x-enum-varnames:
+        - Currency_CURRENCY_UNSPECIFIED
+        - Currency_CURRENCY_USD
+        - Currency_CURRENCY_EUR
+        - Currency_CURRENCY_GBP
+    Image:
+      type: object
+      properties:
+        alt_text:
+          type: string
+        display_order:
+          type: integer
+          format: int32
+        height:
+          type: integer
+          format: int32
+        id:
+          type: integer
+          format: int64
+        product_id:
+          type: integer
+          format: int64
+        url:
+          type: string
+        variant_id:
+          type: integer
+          format: int64
+        width:
+          type: integer
+          format: int32
+    ProductVariant:
+      type: object
+      properties:
+        available_collection_types:
+          type: array
+          items:
+            type: string
+        supported_ship_to_countries:
+          type: array
+          description: ISO-3166 alpha-2 codes this test can be ordered in (AT_HOME shipping destination; for GO_TO_LAB, the requested lab country). Gate your address form on it - orders outside these countries are rejected with an unsupported_ship_to_country field error.
+          items:
+            type: string
+          example:
+            - GB
+        currency:
+          type: integer
+          format: int32
+        descriptive_attrs_override:
+          type: object
+          additionalProperties: {}
+        id:
+          type: integer
+          format: int64
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/Image"
+        price_cents:
+          type: integer
+          format: int32
+        product_id:
+          type: integer
+          format: int64
+        product_type_id:
+          type: integer
+          format: int64
+        variant_availability:
+          type: integer
+          format: int32
+        variant_defining_attrs:
+          type: object
+          additionalProperties: {}
+        variant_name:
+          type: string
+    Product:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Present only on ?show_all=true — the caller's per-product curation flag.
+        availability:
+          $ref: "#/components/schemas/AvailabilityStatus"
+        base_price_cents:
+          type: integer
+          format: int32
+        currency:
+          $ref: "#/components/schemas/Currency"
+        description:
+          type: string
+        id:
+          type: integer
+          format: int64
+        images:
+          type: array
+          items:
+            $ref: "#/components/schemas/Image"
+        model_descriptive_attrs:
+          type: object
+          additionalProperties:
+            type: string
+        name:
+          type: string
+        product_type_id:
+          type: integer
+          format: int64
+        variants:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductVariant"
+    ProductType:
+      type: object
+      properties:
+        description:
+          type: string
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+    ListLabsResponse:
+      type: object
+      required:
+        - labs
+      properties:
+        labs:
+          type: array
+          items:
+            $ref: "#/components/schemas/PSCLocation"
+    PSCLocation:
+      description: A Patient Service Center (lab draw site).
+      type: object
+      required:
+        - code
+        - name
+        - address
+        - phone
+        - latitude
+        - longitude
+        - scheduling
+        - distance
+      properties:
+        code:
+          type: string
+          example: PSC12345
+        name:
+          type: string
+          example: Quest Diagnostics - Midtown
+        address:
+          $ref: "#/components/schemas/AddressDTO"
+        phone:
+          type: string
+          example: +1-212-555-0100
+        hours:
+          type: object
+          additionalProperties:
+            type: string
+          description: Opening hours keyed by weekday.
+          example:
+            monday: 08:00-17:00
+        latitude:
+          type: number
+          example: 40.7549
+        longitude:
+          type: number
+          example: -73.984
+        scheduling:
+          type: boolean
+          description: Whether online scheduling is open.
+        distance:
+          type: number
+          description: Miles from the requested zip.
+    OverviewResponse:
+      type: object
+      required:
+        - orders
+        - results
+        - webhooks
+      properties:
+        orders:
+          type: object
+          required:
+            - total
+            - by_status
+          properties:
+            total:
+              type: integer
+              example: 27
+            by_status:
+              type: object
+              additionalProperties:
+                type: integer
+              description: Order counts keyed by current fulfilment status string.
+              example:
+                order.completed: 29
+                order.processing: 8
+        results:
+          type: object
+          required:
+            - total
+            - missing
+          properties:
+            total:
+              type: integer
+              example: 7
+            missing:
+              type: integer
+              example: 8
+        webhooks:
+          type: object
+          required:
+            - failed_total
+            - daily
+          properties:
+            failed_total:
+              type: integer
+              example: 5
+            daily:
+              type: array
+              items:
+                type: object
+                required:
+                  - date
+                  - failed
+                properties:
+                  date:
+                    type: string
+                    example: "2026-05-16"
+                  failed:
+                    type: integer
+                    example: 1
+    WebhookDeliveriesResponse:
+      type: object
+      required:
+        - deliveries
+      properties:
+        deliveries:
+          type: array
+          items:
+            $ref: "#/components/schemas/WebhookDelivery"
+        next_cursor:
+          type: string
+          description: Pass as ?cursor= for the next page; absent on the last page.
+          example: "333410942627700737"
+    WebhookDelivery:
+      type: object
+      required:
+        - event_id
+        - event_type
+        - order_id
+        - order_item_id
+        - outcome
+        - final_status_code
+        - attempts
+        - completed_at
+        - event_created_at
+      properties:
+        event_id:
+          type: string
+          example: "333410942627700737"
+        event_type:
+          type: string
+          description: Same vocabulary as the webhook event_type field (currently order.status_changed, order_item.status_changed and order_item.results_status_change). Open set - new event types may appear; treat unknown values as deliveries of a newer event family.
+          example: order_item.results_status_change
+        order_id:
+          type: string
+          example: "333410942627700736"
+        order_item_id:
+          type: string
+          example: "333410942627700737"
+        outcome:
+          type: string
+          description: "One of: delivered, rejected, invalid, dead_lettered, replayed."
+          example: dead_lettered
+        final_status_code:
+          type:
+            - integer
+            - "null"
+          example: 500
+        attempts:
+          type: integer
+          example: 6
+        completed_at:
+          type: string
+          format: date-time
+        event_created_at:
+          type: string
+          format: date-time

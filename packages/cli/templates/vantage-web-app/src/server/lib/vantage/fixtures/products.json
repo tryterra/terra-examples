@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "name": "Blood Test",
+    "description": "Blood testing and analysis services"
+  },
+  {
+    "id": 2,
+    "name": "DNA Test",
+    "description": "Genetic testing and analysis"
+  },
+  {
+    "id": 3,
+    "name": "Connected Device",
+    "description": "IoT health monitoring devices"
+  }
+]

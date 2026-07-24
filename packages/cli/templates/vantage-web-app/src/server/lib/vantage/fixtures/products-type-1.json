@@ -1,0 +1,24 @@
+[
+  {
+    "id": 10001,
+    "product_type_id": 1,
+    "name": "Thriva Blood Test",
+    "description": "At-home finger-prick blood test kit for core biomarkers (placeholder).",
+    "model_descriptive_attrs": null,
+    "base_price_cents": 3999,
+    "currency": 2,
+    "availability": 1,
+    "images": []
+  },
+  {
+    "id": 10002,
+    "product_type_id": 1,
+    "name": "Imaware Blood Test",
+    "description": "At-home blood test kit with lab processing (placeholder).",
+    "model_descriptive_attrs": null,
+    "base_price_cents": 4999,
+    "currency": 840,
+    "availability": 1,
+    "images": []
+  }
+]

@@ -1,0 +1,33 @@
+# Shared OpenAPI components for the Vantage spec. Mirrors the upstream
+# Vantage API spec conventions so error handling converges on RFC 9457
+# across Terra surfaces as endpoints are documented.
+securitySchemes:
+  basicAuth:
+    type: http
+    scheme: basic
+    description: Client ID and client secret as HTTP Basic credentials.
+
+schemas:
+  Problem:
+    type: object
+    description: >
+      Target error contract (RFC 9457 Problem Details). NOTE: handlers
+      currently return plain-text or ad-hoc error bodies — verify each
+      operation's real shape against the handler before documenting it;
+      migrate handlers onto problem+json as part of documenting them.
+    properties:
+      type:
+        type: string
+        example: about:blank
+      title:
+        type: string
+        example: unauthorized
+      instance:
+        type: string
+        description: The request path, including any query string, that produced this problem.
+      detail:
+        type: string
+    required:
+      - type
+      - title
+      - instance
