@@ -21,10 +21,11 @@ Then read the generated AGENTS.md and follow it to fill in .env and deploy with 
 
 ## Examples
 
-| Example                           | Description                                                | Stack                                    |
-| --------------------------------- | ---------------------------------------------------------- | ---------------------------------------- |
-| [Terra Basecamp](#terra-basecamp) | Wearable & health data on a dashboard with an AI assistant | React · Hono · Cloudflare Workers · Neon |
-| [Terra Grip](#terra-grip)         | Real-time wearable streaming from a mobile app             | React Native · Expo · terra-rt           |
+| Example                           | Description                                                            | Stack                                    |
+| --------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------- |
+| [Terra Basecamp](#terra-basecamp) | Wearable & health data on a dashboard with an AI assistant             | React · Hono · Cloudflare Workers · Neon |
+| [Terra Grip](#terra-grip)         | Real-time wearable streaming from a mobile app                         | React Native · Expo · terra-rt           |
+| [Terra Dispatch](#terra-dispatch) | Diagnostics storefront & ops console: order test kits, deliver results | React · Hono · SQLite (Drizzle)          |
 
 _More examples coming. Each is a standalone, runnable project with its own README._
 
@@ -69,6 +70,27 @@ npm create tryterra-app -- --template streaming-mobile-app
 The Terra RT SDK is a native module, so the app needs a development build (Expo Go is
 not supported), and pairing needs a physical phone. See the
 [template README](./packages/cli/templates/streaming-mobile-app/README.md) for details.
+
+### Terra Dispatch
+
+`vantage-web-app` – [browse the template »](./packages/cli/templates/vantage-web-app)
+
+A white-label diagnostics storefront and ops console built on Terra's
+[Vantage API](https://docs.tryterra.co/vantage-api-docs): customers order blood & DNA
+test kits from a shop, and an operator console tracks fulfilment and delivers FHIR
+results. Runs out of the box with zero credentials (demo mode on real captured sandbox
+data), or against the live Vantage sandbox with an API key.
+
+**Demonstrates:** catalog browse & curation, at-home and go-to-lab ordering (with
+draw-site lookup and address autocomplete), idempotent order creation, kit activation,
+signed webhooks with a verification inbox, FHIR result parsing, the results
+acknowledgment flow, escalations, and sandbox lifecycle simulation.
+
+**Stack:** React 19 · Hono · TanStack Router/Query · Drizzle (SQLite) · Tailwind v4
+
+```bash
+npm create tryterra-app -- --template vantage-web-app
+```
 
 ## Getting started
 
