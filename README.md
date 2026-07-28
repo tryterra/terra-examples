@@ -25,6 +25,7 @@ Then read the generated AGENTS.md and follow it to fill in .env and deploy with 
 | --------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------- |
 | [Terra Basecamp](#terra-basecamp) | Wearable & health data on a dashboard with an AI assistant             | React · Hono · Cloudflare Workers · Neon |
 | [Terra Grip](#terra-grip)         | Real-time wearable streaming from a mobile app                         | React Native · Expo · terra-rt           |
+| [Terra Pulse](#terra-pulse)       | Consumes real-time wearable streams over a WebSocket                   | React · Vite · Express                   |
 | [Terra Dispatch](#terra-dispatch) | Diagnostics storefront & ops console: order test kits, deliver results | React · Hono · SQLite (Drizzle)          |
 
 _More examples coming. Each is a standalone, runnable project with its own README._
@@ -70,6 +71,26 @@ npm create tryterra-app -- --template streaming-mobile-app
 The Terra RT SDK is a native module, so the app needs a development build (Expo Go is
 not supported), and pairing needs a physical phone. See the
 [template README](./packages/cli/templates/streaming-mobile-app/README.md) for details.
+
+### Terra Pulse
+
+`streaming-consumer-web-app` ([browse the template »](./packages/cli/templates/streaming-consumer-web-app))
+
+An example web app built on Terra's [Streaming API](https://docs.tryterra.co) that
+consumes real-time wearable data with no SDK. It opens a WebSocket to Terra's broker,
+authenticates as a consumer with a single-use developer token, and renders every
+reading on a live dashboard as it arrives.
+
+**Demonstrates:** consumer WebSocket connections, single-use developer tokens minted by
+a tiny backend (no API keys in the browser), the full connection lifecycle with
+jittered heartbeats, resilient reconnects with exponential backoff, and a live
+per-user, per-type dashboard.
+
+**Stack:** React 19 (Vite) · Recharts · a framework-free WebSocket client · Express token server
+
+```bash
+npm create tryterra-app -- --template streaming-consumer-web-app
+```
 
 ### Terra Dispatch
 
