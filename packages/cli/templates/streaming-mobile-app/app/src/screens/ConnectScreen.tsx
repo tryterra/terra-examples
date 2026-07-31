@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -9,7 +10,8 @@ import {
   View,
 } from 'react-native';
 import { ChevronDown, QrCode, RefreshCw } from 'lucide-react-native';
-import { getSession, hasValidSession } from '../auth';
+import { getSession, grantStreamConsent, hasValidSession } from '../auth';
+import { PRIVACY_POLICY_URL } from '../terraUrls';
 import { Banner } from '../components/Banner';
 import { Button } from '../components/Button';
 import { EmptyState } from '../components/EmptyState';
@@ -19,12 +21,11 @@ import { ConnectionType, DiscoveredDevice, SCANNING_TYPES } from '../producer/Pr
 import { useProducer } from '../producer/useProducer';
 import { colors, fonts } from '../theme';
 
-// Wear OS is hidden until the companion app ships — re-add
-// { id: 'WEAR', label: 'Wear OS' } on Android when it does.
 const SOURCES: { id: ConnectionType; label: string }[] = [
   { id: 'BLE', label: 'BLE device' },
   { id: 'PHONE', label: 'Phone sensors' },
   ...(Platform.OS === 'ios' ? [{ id: 'WATCH' as ConnectionType, label: 'Apple Watch' }] : []),
+  ...(Platform.OS === 'android' ? [{ id: 'WEAR' as ConnectionType, label: 'Wear OS' }] : []),
 ];
 
 /** Row subtitle: the SDK's device type when present, else a MAC stub. */
@@ -70,10 +71,11 @@ export function ConnectScreen({ onGoToPair, onGoToLive }: Props) {
   // silently with the QR's reference_id and go straight to device
   // selection; errors pause the loop for a manual retry / re-pair.
   useEffect(() => {
-    if (producer.phase === 'idle' && !producer.error && hasValidSession()) {
+    const consented = session?.demo || session?.consentAt;
+    if (producer.phase === 'idle' && !producer.error && hasValidSession() && consented) {
       void c.setup(session?.referenceId?.trim() || 'demo-user');
     }
-  }, [producer.phase, producer.error, c, session?.referenceId]);
+  }, [producer.phase, producer.error, c, session?.referenceId, session?.demo, session?.consentAt]);
 
   // Scanning starts the moment the device step appears — there is no
   // "find devices" button. Kicked once per entry/source switch so a
@@ -121,13 +123,24 @@ export function ConnectScreen({ onGoToPair, onGoToLive }: Props) {
     })();
   };
 
+  const legalFooter = (
+    <View style={styles.legalFooter}>
+      <Text style={styles.legalText}>
+        Not a medical device. Consult a doctor before making medical decisions.
+      </Text>
+      <Pressable onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)} hitSlop={8}>
+        <Text style={styles.link}>Privacy Policy</Text>
+      </Pressable>
+    </View>
+  );
+
   // Not paired yet — everything below needs the rt. token.
   if (!hasValidSession()) {
     return (
       <EmptyState
         icon={QrCode}
         title="Pair to get started"
-        text="Connect this device to your Terra dashboard first — scan the pairing QR and everything else takes care of itself."
+        text="Scan the pairing QR from your Terra dashboard to connect this device."
         buttonTitle="Scan to pair"
         onPress={onGoToPair}
       />
@@ -148,6 +161,40 @@ export function ConnectScreen({ onGoToPair, onGoToLive }: Props) {
     );
   }
 
+  // Consent gate: health data leaves the device the moment a source
+  // connects, so agreement comes first. Stored on the pairing session —
+  // a new pairing always asks again. Demo mode is exempt (local-only).
+  if (session && !session.demo && !session.consentAt) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Stream your data to Terra?</Text>
+          <Text style={styles.body}>
+            Live readings from your connected source (heart rate, HRV, ECG,
+            motion, steps, and similar workout metrics) are sent to Terra's
+            servers and shown on the dashboard you paired with. Your data is
+            only used to provide this service, never for advertising or
+            marketing.
+          </Text>
+          <Text style={styles.hint}>
+            Stop streaming at any time, or unpair on the Pair tab to end the
+            session and clear this device.
+          </Text>
+          <View style={styles.footerRow}>
+            <Button title="Not now" variant="ghost" onPress={onGoToLive} />
+            <View style={styles.footerGrow}>
+              <Button
+                title="Agree and continue"
+                onPress={() => void grantStreamConsent()}
+              />
+            </View>
+          </View>
+        </View>
+        {legalFooter}
+      </View>
+    );
+  }
+
   const streaming = phase === 'streaming' || phase === 'starting';
   const connected = phase === 'deviceConnected' || streaming;
   const scans = SCANNING_TYPES.includes(connectionType);
@@ -163,7 +210,7 @@ export function ConnectScreen({ onGoToPair, onGoToLive }: Props) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Who's streaming?</Text>
           <Text style={styles.body}>
-            Streaming as "{producer.referenceId}" — the name comes from the
+            Streaming as "{producer.referenceId}". The name comes from the
             dashboard QR; re-pair with a new code to change it.
           </Text>
           <Button title="Continue" onPress={() => setShowIdentity(false)} />
@@ -187,8 +234,8 @@ export function ConnectScreen({ onGoToPair, onGoToLive }: Props) {
         <View style={styles.card}>
           <Banner text={error} tone="error" />
           <Text style={styles.hint}>
-            Setup keeps failing? Your pairing session may have been revoked —
-            scan a fresh QR code from the dashboard.
+            Setup keeps failing? Your pairing session may have been revoked.
+            Scan a fresh QR code from the dashboard.
           </Text>
           <View style={styles.footerRow}>
             <Button title="Re-pair" variant="secondary" onPress={onGoToPair} />
@@ -225,6 +272,17 @@ export function ConnectScreen({ onGoToPair, onGoToLive }: Props) {
                 );
               })}
             </View>
+
+            {/* HealthKit identification (App Store guideline 2.5.1). Shown
+                persistently on iOS — not gated behind selecting the Apple
+                Watch source — so it is visible to anyone who opens this tab,
+                including in demo mode, without pairing or a watch. */}
+            {Platform.OS === 'ios' && (
+              <Text style={styles.hint}>
+                Apple Watch streaming uses Apple HealthKit: the watch reads your
+                heart rate through a HealthKit workout session while streaming.
+              </Text>
+            )}
 
             {scans ? (
               <View style={styles.deviceBox}>
@@ -294,15 +352,19 @@ export function ConnectScreen({ onGoToPair, onGoToLive }: Props) {
                   )}
                 </View>
                 <Text style={styles.deviceBoxHint}>
-                  Put your device in pairing mode if it isn't listed.
+                  {connectionType === 'WEAR'
+                    ? 'Open Terra Grip on your watch and tap Make discoverable if it isn’t listed.'
+                    : "Put your device in pairing mode if it isn't listed."}
                 </Text>
               </View>
             ) : (
-              <Text style={styles.body}>
-                {connectionType === 'WATCH'
-                  ? 'Open Terra Grip on your Apple Watch, then continue — pairing happens over WatchConnectivity.'
-                  : "Streams this phone's own motion sensors — nothing to pair."}
-              </Text>
+              <>
+                <Text style={styles.body}>
+                  {connectionType === 'WATCH'
+                    ? 'Open Terra Grip on your Apple Watch, then continue. Pairing happens over WatchConnectivity.'
+                    : "Streams this phone's own motion sensors. Nothing to pair."}
+                </Text>
+              </>
             )}
 
             {error ? (
@@ -375,14 +437,14 @@ export function ConnectScreen({ onGoToPair, onGoToLive }: Props) {
               // what connecting to headphones/a TV looks like.
               <Banner
                 tone="warning"
-                text={`Connected, but no data received. ${deviceName ?? 'This device'} may not provide supported readings (heart rate, motion…) — try a different device.`}
+                text={`Connected, but no data received. ${deviceName ?? 'This device'} may not provide supported readings (heart rate, motion…). Try a different device.`}
               />
             ) : (
               <Banner
                 text={
                   terraSocketConnected
                     ? 'Streaming to Terra'
-                    : 'Streaming — connecting to Terra…'
+                    : 'Streaming, connecting to Terra…'
                 }
                 tone="info"
                 busy={!terraSocketConnected}
@@ -416,6 +478,7 @@ export function ConnectScreen({ onGoToPair, onGoToLive }: Props) {
           </View>
         </View>
       )}
+      {legalFooter}
     </View>
   );
 }
@@ -442,6 +505,20 @@ const styles = StyleSheet.create({
     color: colors.textDim,
     fontSize: 11,
     fontFamily: fonts.regular,
+    lineHeight: 16,
+  },
+  link: {
+    color: colors.primary,
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    textAlign: 'center',
+  },
+  legalFooter: { marginTop: 'auto', alignItems: 'center', gap: 3, paddingTop: 10 },
+  legalText: {
+    color: colors.textDim,
+    fontSize: 11,
+    fontFamily: fonts.regular,
+    textAlign: 'center',
     lineHeight: 16,
   },
   cardFill: { flexGrow: 1 },

@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
 import {
   clearSession,
   getSession,
   parsePairingPayload,
   saveSession,
 } from '../auth';
+import { PRIVACY_POLICY_URL } from '../terraUrls';
 import { colors, fonts } from '../theme';
 import { Button } from '../components/Button';
 import { toast } from '../components/Toaster';
@@ -71,7 +72,7 @@ export function PairScreen({ active, onPaired }: Props) {
     if (handledRef.current) return;
     const session = parsePairingPayload(raw);
     if (!session) {
-      setError("That doesn't look like a Terra pairing code — try again.");
+      setError("That doesn't look like a Terra pairing code. Try again.");
       toast.error("That doesn't look like a Terra pairing code");
       return;
     }
@@ -100,9 +101,9 @@ export function PairScreen({ active, onPaired }: Props) {
         <View style={[StyleSheet.absoluteFill, styles.cameraFallback]}>
           <Text style={styles.fallbackText}>
             {camera == null
-              ? 'Camera module not in this build — rebuild the app to scan the pairing QR.'
+              ? 'Camera module not in this build. Rebuild the app to scan the pairing QR.'
               : permission === 'denied'
-                ? 'Camera access is needed to scan the pairing QR — enable it in Settings.'
+                ? 'Camera access is needed to scan the pairing QR. Enable it in Settings.'
                 : 'Starting camera…'}
           </Text>
         </View>
@@ -138,6 +139,16 @@ export function PairScreen({ active, onPaired }: Props) {
             }}
           />
         ) : null}
+        <Text style={styles.legal}>
+          Not a medical device. Consult a doctor before making medical
+          decisions.
+        </Text>
+        <Pressable
+          onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
+          hitSlop={8}
+        >
+          <Text style={styles.legalLink}>Privacy Policy</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -201,5 +212,19 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.regular,
     textAlign: 'center',
+  },
+  legal: {
+    color: '#8E9AAB',
+    fontSize: 11,
+    fontFamily: fonts.regular,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  legalLink: {
+    color: '#C8D2E0',
+    fontSize: 12,
+    fontFamily: fonts.medium,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
 });

@@ -236,7 +236,7 @@ export class ProducerController {
           this.set({
             phase: 'ready',
             error:
-              "Couldn't reach your Apple Watch — make sure Terra Grip is installed and open on the watch",
+              "Couldn't reach your Apple Watch. Make sure Terra Grip is installed and open on the watch",
           });
           return;
         }
@@ -317,7 +317,7 @@ export class ProducerController {
     try {
       if (!this.snapshot.userId) {
         throw new Error(
-          'no Terra user_id from registration — re-run setup before streaming',
+          'no Terra user_id from registration. Re-run setup before streaming',
         );
       }
       const token = await api.fetchStreamingToken(this.snapshot.userId);

@@ -23,17 +23,30 @@ struct ContentView: View {
     @State private var status = "Not connected"
 
     var body: some View {
-        VStack(spacing: 12) {
-            Text("Terra Grip")
-                .font(.headline)
-            Text(status)
-                .font(.footnote)
-                .foregroundColor(.gray)
+        // Scrolls: logo + status + button + caption exceed a small watch
+        // face, and a fixed VStack clips off the round screen edges.
+        ScrollView {
+            VStack(spacing: 8) {
+                Image("Logo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 44, height: 44)
+                Text(status)
+                    .font(.footnote)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
 
-            Button(streaming ? "Stop" : "Start streaming") {
-                streaming ? stop() : start()
+                Button(streaming ? "Stop" : "Start streaming") {
+                    streaming ? stop() : start()
+                }
+                .tint(streaming ? .red : .green)
+
+                Text("Reads heart rate via a HealthKit workout session")
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
             }
-            .tint(streaming ? .red : .green)
+            .frame(maxWidth: .infinity)
         }
         .onAppear(perform: connect)
     }

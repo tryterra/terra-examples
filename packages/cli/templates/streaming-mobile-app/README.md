@@ -4,6 +4,8 @@ Reference app for [Terra's Streaming API](https://docs.tryterra.co): real-time w
 
 Scan a QR code from your Terra dashboard and the app streams live sensor data to Terra for the next several hours. No backend, no accounts, no API keys on the device.
 
+Install it from the [App Store](https://apps.apple.com/app/id6789555253) or [Google Play](https://play.google.com/store/apps/details?id=co.tryterra.streamingdemo), or build it from source below.
+
 ## Quickstart
 
 Prereqs: Node 18+, Xcode or Android Studio, and access to the [Terra dashboard](https://dashboard.tryterra.co) streaming page.

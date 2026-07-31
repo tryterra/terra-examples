@@ -21,8 +21,6 @@
       "infoPlist": {
         "NSBluetoothAlwaysUsageDescription": "This demo connects to BLE heart-rate sensors to stream live data to Terra.",
         "NSMotionUsageDescription": "Required if streaming motion data from the phone's built-in sensors.",
-        "NSHealthShareUsageDescription": "The Terra SDK can read workout data from Apple Health when streaming from an Apple Watch. This demo only accesses Health data with your explicit consent.",
-        "NSHealthUpdateUsageDescription": "The Terra SDK can record workout sessions to Apple Health when streaming from an Apple Watch. This demo only writes Health data with your explicit consent.",
         "UIBackgroundModes": [
           "bluetooth-central"
         ],
@@ -33,7 +31,11 @@
     "android": {
       "edgeToEdgeEnabled": true,
       "package": "com.example.streamingdemo",
-      "versionCode": 4,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#BBDAF7"
+      },
+      "versionCode": 5,
       "intentFilters": [
         {
           "action": "VIEW",
@@ -58,8 +60,13 @@
         "android.permission.ACTIVITY_RECOGNITION",
         "android.permission.BODY_SENSORS",
         "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
-        "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.CAMERA"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "plugins": [
@@ -75,7 +82,12 @@
         }
       ],
       "expo-fmt-consteval-fix",
-      "expo-secure-store",
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": false
+        }
+      ],
       [
         "@bacons/apple-targets",
         {
@@ -86,7 +98,8 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Used to scan the pairing QR code from the Terra dashboard."
+          "cameraPermission": "Used to scan the pairing QR code from the Terra dashboard.",
+          "microphonePermission": false
         }
       ]
     ],

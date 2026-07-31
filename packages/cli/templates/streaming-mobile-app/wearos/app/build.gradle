@@ -13,8 +13,36 @@ android {
     applicationId 'co.tryterra.streamingdemo'
     minSdk 30
     targetSdk 34
-    versionCode 1
+    // Must be unique across ALL artifacts of this package on Play. The phone
+    // app's versionCode is managed by EAS (remote, currently ~11 and
+    // incrementing), so the watch sits in a separate high band to guarantee
+    // no collision. Bump this for each new watch upload.
+    versionCode 1000
     versionName '1.1.0'
+  }
+
+  signingConfigs {
+    // Signs with the same Play upload key as the phone app. The keystore path
+    // and passwords come from ~/.gradle/gradle.properties (TERRA_UPLOAD_*) or
+    // CI env — never committed. Falls back to unsigned (debug) when absent so
+    // local dev builds still work.
+    release {
+      if (project.hasProperty('TERRA_UPLOAD_STORE_FILE')) {
+        storeFile file(TERRA_UPLOAD_STORE_FILE)
+        storePassword TERRA_UPLOAD_STORE_PASSWORD
+        keyAlias TERRA_UPLOAD_KEY_ALIAS
+        keyPassword TERRA_UPLOAD_KEY_PASSWORD
+      }
+    }
+  }
+
+  buildTypes {
+    release {
+      if (project.hasProperty('TERRA_UPLOAD_STORE_FILE')) {
+        signingConfig signingConfigs.release
+      }
+      minifyEnabled false
+    }
   }
 
   buildFeatures {

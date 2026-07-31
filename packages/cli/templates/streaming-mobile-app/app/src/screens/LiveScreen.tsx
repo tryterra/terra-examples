@@ -76,13 +76,13 @@ export function LiveScreen({ onGoToPair, onGoToConnect }: Props) {
       <EmptyState
         icon={Activity}
         title="Get connected"
-        text="Scan the pairing QR from your Terra dashboard — the app stays connected automatically from then on."
+        text="Scan the pairing QR from your Terra dashboard. The app stays connected from then on."
         buttonTitle="Scan to pair"
         onPress={onGoToPair}
         secondaryTitle="Try the demo"
         onSecondary={() => {
           void saveSession(createDemoSession()).then(() =>
-            toast.success('Demo mode', 'Synthetic data — nothing leaves your phone'),
+            toast.success('Demo mode', 'Synthetic data. Nothing leaves your phone'),
           );
         }}
       />
@@ -96,7 +96,7 @@ export function LiveScreen({ onGoToPair, onGoToConnect }: Props) {
         icon={TriangleAlert}
         tone="error"
         title="Session expired"
-        text="Your pairing session has ended — scan a new QR code from the Terra dashboard to reconnect this device."
+        text="Your pairing session has ended. Scan a new QR code from the Terra dashboard to reconnect."
         buttonTitle="Scan to reconnect"
         onPress={onGoToPair}
       />
@@ -111,8 +111,8 @@ export function LiveScreen({ onGoToPair, onGoToConnect }: Props) {
           busy={!producer.terraSocketConnected}
           text={
             producer.terraSocketConnected
-              ? `Streaming to Terra, but ${producer.deviceName ?? 'your device'} isn't sending data — check it's worn and awake.`
-              : 'Connection to Terra lost — reconnecting…'
+              ? `Streaming to Terra, but ${producer.deviceName ?? 'your device'} isn't sending data. Check it's worn and awake.`
+              : 'Connection to Terra lost, reconnecting…'
           }
         />
       )}
@@ -134,7 +134,7 @@ export function LiveScreen({ onGoToPair, onGoToConnect }: Props) {
             producer.terraSocketConnected ? (
               <EmptyState
                 icon={BluetoothSearching}
-                title="Streaming to Terra — no data from your device"
+                title="Streaming to Terra, but no data from your device"
                 text={`The connection to Terra is live, but ${producer.deviceName ?? 'your device'} hasn't sent any readings. Check it's worn, awake and in range.`}
                 buttonTitle="Manage device"
                 onPress={onGoToConnect}
@@ -143,7 +143,7 @@ export function LiveScreen({ onGoToPair, onGoToConnect }: Props) {
               <EmptyState
                 icon={TriangleAlert}
                 title="Reconnecting to Terra"
-                text={`${producer.deviceName ?? 'Your device'} is connected, but the link to Terra dropped. Reconnecting automatically — readings resume when it's back.`}
+                text={`${producer.deviceName ?? 'Your device'} is connected, but the link to Terra dropped. Reconnecting automatically; readings resume when it's back.`}
               />
             )
           ) : (

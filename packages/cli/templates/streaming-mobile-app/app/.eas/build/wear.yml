@@ -1,0 +1,37 @@
+# EAS custom build for the Wear OS companion (wearos/ — a standalone Gradle
+# module EAS's managed flow doesn't build). It runs under the phone's EAS
+# project, so `eas build --profile wear --auto-submit` reuses the same Play
+# service account already stored in EAS.
+#
+# Signing: EAS's built-in eas/inject_android_credentials only targets the
+# standard Expo android/app/ layout, so it can't sign this module. Instead the
+# upload keystore is provided as an EAS FILE SECRET and consumed by the
+# signingConfig already in wearos/app/build.gradle. The key stays in EAS —
+# nothing in GitHub. One-time setup on your EAS account:
+#
+#   eas env:create --name TERRA_UPLOAD_KEYSTORE --type file \
+#     --value ~/terra-upload.keystore --visibility secret --environment production
+#   eas env:create --name TERRA_UPLOAD_STORE_PASSWORD --value '…' --visibility secret --environment production
+#   eas env:create --name TERRA_UPLOAD_KEY_ALIAS     --value terra-upload --visibility secret --environment production
+#   eas env:create --name TERRA_UPLOAD_KEY_PASSWORD  --value '…' --visibility secret --environment production
+#
+# A file secret is exposed on the builder as an env var holding the file PATH,
+# so $TERRA_UPLOAD_KEYSTORE is the keystore's absolute path at build time.
+
+build:
+  name: Terra Grip Wear OS companion
+  steps:
+    - eas/checkout
+
+    - run:
+        name: Build + sign the Wear AAB
+        command: |
+          set -euo pipefail
+          cd ../wearos
+          ./gradlew :app:bundleRelease --no-daemon \
+            -PTERRA_UPLOAD_STORE_FILE="$TERRA_UPLOAD_KEYSTORE" \
+            -PTERRA_UPLOAD_STORE_PASSWORD="$TERRA_UPLOAD_STORE_PASSWORD" \
+            -PTERRA_UPLOAD_KEY_ALIAS="$TERRA_UPLOAD_KEY_ALIAS" \
+            -PTERRA_UPLOAD_KEY_PASSWORD="$TERRA_UPLOAD_KEY_PASSWORD"
+
+    - eas/find_and_upload_build_artifacts

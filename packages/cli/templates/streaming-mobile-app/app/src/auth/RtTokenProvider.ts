@@ -13,7 +13,7 @@ import { TokenProvider } from './TokenProvider';
 
 export class SessionExpiredError extends Error {
   constructor() {
-    super('Pairing session expired — scan a new QR from the Terra dashboard');
+    super('Pairing session expired. Scan a new QR from the Terra dashboard');
     this.name = 'SessionExpiredError';
   }
 }

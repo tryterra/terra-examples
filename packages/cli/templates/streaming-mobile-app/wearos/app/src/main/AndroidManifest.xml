@@ -9,6 +9,13 @@
   <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
   <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 
+  <!-- Background streaming: a foreground service (health type on Android 14+)
+       keeps the process alive so the Health Services exercise keeps relaying
+       to the phone with the screen off. -->
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+  <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
   <!-- terra-wearos reads Health Services (docs requirement). -->
   <queries>
     <package android:name="com.google.android.wearable.healthservices" />
@@ -16,6 +23,8 @@
 
   <application
     android:label="Terra Grip"
+    android:icon="@mipmap/ic_launcher"
+    android:roundIcon="@mipmap/ic_launcher"
     android:theme="@android:style/Theme.DeviceDefault">
 
     <!-- Standalone: installable from the watch Play Store without the phone app. -->
@@ -31,5 +40,10 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+
+    <service
+      android:name=".StreamingService"
+      android:exported="false"
+      android:foregroundServiceType="health" />
   </application>
 </manifest>

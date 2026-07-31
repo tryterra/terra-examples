@@ -14,6 +14,12 @@ export interface PairingSession {
   expiresAt: number | null; // epoch ms
   /** Demo mode — synthetic local data via the fake SDK adapter; no network. */
   demo?: boolean;
+  /**
+   * When the user agreed to stream their health data to Terra (epoch ms).
+   * Lives on the session so a new pairing always asks again; absent on
+   * demo sessions (nothing leaves the device).
+   */
+  consentAt?: number;
 }
 
 /** A ready-made demo session — "Try the demo" on first launch. */
@@ -118,6 +124,12 @@ export async function saveSession(session: PairingSession): Promise<void> {
   } catch {
     // keychain hiccup: session still works in-memory for this run
   }
+}
+
+/** Record the user's agreement to stream health data to Terra. */
+export async function grantStreamConsent(): Promise<void> {
+  if (!cached) return;
+  await saveSession({ ...cached, consentAt: Date.now() });
 }
 
 /** Drop the session (expiry, revocation-401, or user-initiated re-pair). */

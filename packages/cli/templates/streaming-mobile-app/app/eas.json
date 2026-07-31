@@ -16,6 +16,12 @@
     },
     "production": {
       "autoIncrement": true
+    },
+    "wear": {
+      "config": "wear.yml",
+      "android": {
+        "buildArtifactPaths": ["../wearos/app/build/outputs/bundle/release/*.aab"]
+      }
     }
   },
   "submit": {
@@ -23,6 +29,11 @@
       "ios": {
         "ascAppId": "YOUR_ASC_APP_ID"
       },
+      "android": {
+        "track": "internal"
+      }
+    },
+    "wear": {
       "android": {
         "track": "internal"
       }
