@@ -27,6 +27,7 @@ Then read the generated AGENTS.md and follow it to fill in .env and deploy with 
 | [Terra Grip](#terra-grip)         | Real-time wearable streaming from a mobile app                         | React Native · Expo · terra-rt           |
 | [Terra Pulse](#terra-pulse)       | Consumes real-time wearable streams over a WebSocket                   | React · Vite · Express                   |
 | [Terra Dispatch](#terra-dispatch) | Diagnostics storefront & ops console: order test kits, deliver results | React · Hono · SQLite (Drizzle)          |
+| [Terra Panel](#terra-panel)       | Doctor-facing lab reports + wearable data, with AI insights            | React · Hono · SQLite (Drizzle)          |
 
 _More examples coming. Each is a standalone, runnable project with its own README._
 
@@ -111,6 +112,28 @@ acknowledgment flow, escalations, and sandbox lifecycle simulation.
 
 ```bash
 npm create tryterra-app -- --template vantage-web-app
+```
+
+### Terra Panel
+
+`lab-reports-web-app` – [browse the template »](./packages/cli/templates/lab-reports-web-app)
+
+A doctor-facing dashboard built on Terra's [Lab Reports API](https://docs.tryterra.co)
+joined with wearable data: upload any lab-report PDF, get standardized biomarkers back,
+and read them against the same patient's wearable history (the `reference_id` join).
+Runs out of the box with zero credentials (demo mode on bundled, fully synthetic sample
+data), or live against the Terra API with your keys.
+
+**Demonstrates:** lab-report upload and standardization, cross-report biomarker trends,
+the lab x wearable join, a patient timeline of draws over wearable lanes, deterministic
+domain scoring with explainable contributions, chronicity/trajectory vs each patient's
+own baseline, pre-draw context, AI wearable-signal insights with structured output, and
+retest-overdue triage.
+
+**Stack:** React 19 · Hono · TanStack Router/Query · Drizzle (SQLite) · Tailwind v4
+
+```bash
+npm create tryterra-app -- --template lab-reports-web-app
 ```
 
 ## Getting started
