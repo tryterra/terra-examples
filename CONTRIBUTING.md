@@ -53,7 +53,3 @@ and setup behavior inside the app's documentation and scripts.
 No Terra CLI release is required for a valid schema-v1 example. Changes to the
 catalog schema require coordinated CLI support first.
 
-## Migration
-
-Follow [MIGRATION.md](MIGRATION.md) for the coordinated Terra CLI release and
-npm package deprecation. Mirror workflows target `examples/`.

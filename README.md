@@ -5,184 +5,91 @@
   <h3 align="center">Terra Examples</h3>
 </p>
 
-Examples built by [Terra API](https://tryterra.co). One command to pull a full working app, deploy it to your own infrastructure, and build on top of it.
+Standalone example apps built with [Terra API](https://tryterra.co). Download an
+app with the Terra CLI, configure it, and build on top of it.
 
-```bash
-npm create tryterra-app
+```sh
+terra examples list
+terra examples init unified-api-web-app my-app
 ```
 
-**Prefer to let an AI coding agent do it?** Paste this into Claude Code (or Cursor, Copilot, …) and it'll scaffold, configure, and deploy an example for you:
+The CLI fetches the current examples from this repository and prints the next
+steps. The destination must be a new directory inside an existing parent. If you
+omit the directory, it defaults to the example's name.
 
-```
-Set up the Terra Basecamp example app for me:
-npx --yes create-tryterra-app@latest terra-basecamp --template unified-api-web-app --yes --json
-Then read the generated AGENTS.md and follow it to fill in .env and deploy with npm run setup. Ask me for any credentials (Cloudflare, Neon, Terra) you need.
-```
+Downloading requires a network connection. Follow the app's README to install
+dependencies, configure credentials, and run it.
 
 ## Examples
 
-| Example                           | Description                                                            | Stack                                    |
-| --------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------- |
-| [Terra Basecamp](#terra-basecamp) | Wearable & health data on a dashboard with an AI assistant             | React · Hono · Cloudflare Workers · Neon |
-| [Terra Grip](#terra-grip)         | Real-time wearable streaming from a mobile app                         | React Native · Expo · terra-rt           |
-| [Terra Pulse](#terra-pulse)       | Consumes real-time wearable streams over a WebSocket                   | React · Vite · Express                   |
-| [Terra Dispatch](#terra-dispatch) | Diagnostics storefront & ops console: order test kits, deliver results | React · Hono · SQLite (Drizzle)          |
-| [Terra Panel](#terra-panel)       | Doctor-facing lab reports + wearable data, with AI insights            | React · Hono · SQLite (Drizzle)          |
-
-_More examples coming. Each is a standalone, runnable project with its own README._
-
 ### Terra Basecamp
 
-`unified-api-web-app` – [browse the template »](./packages/cli/templates/unified-api-web-app)
+[`unified-api-web-app`](./examples/unified-api-web-app) connects wearables and
+health data sources to a health dashboard with an AI assistant. It demonstrates
+device connection, webhook ingestion, multi-provider deduplication, scheduled
+sync, and deployment to a Cloudflare Worker.
 
-An example web app built on Terra's [Unified API](https://tryterra.co/products/api). It
-connects users' wearables and health data sources (Garmin, Fitbit, Oura, and more) and
-displays them on a health dashboard with an AI health assistant.
+**Stack:** React, Hono, Cloudflare Workers, Neon Postgres, and BetterAuth.
 
-**Demonstrates:** device connection, webhook ingestion, multi-provider deduplication,
-scheduled sync, a unified health dashboard, an LLM assistant via Terra MCP tools,
-one-command setup, and single-worker deployment.
-
-**Stack:** React 19 · Hono on Cloudflare Workers · Neon Postgres (Drizzle) · BetterAuth · LLM on Durable Objects (Vercel AI SDK)
-
-```bash
-npm create tryterra-app -- --template unified-api-web-app
+```sh
+terra examples init unified-api-web-app my-app
+cd my-app
+npm install
 ```
+
+Read the downloaded README and AGENTS.md to configure credentials, then run:
+
+```sh
+npm run setup
+npm run dev
+```
+
+The setup script provisions services and deploys the app to your infrastructure.
 
 ### Terra Grip
 
-`streaming-mobile-app` ([browse the template »](./packages/cli/templates/streaming-mobile-app))
+[`streaming-mobile-app`](./examples/streaming-mobile-app) streams real-time
+sensor data from BLE devices, a phone, or a companion watch app. It demonstrates
+QR pairing, background streaming, Apple Watch and Wear OS companions, and a demo
+mode with synthetic data.
 
-An example mobile app built on Terra's [Streaming API](https://docs.tryterra.co) and the
-[`terra-rt`](https://www.npmjs.com/package/terra-rt) SDK. Scan a pairing QR code from the
-Terra dashboard and the phone streams live sensor data to Terra: from BLE devices, the
-phone's own sensors, or a companion watch app. No backend, no accounts, no API keys on
-the device.
+**Stack:** React Native, Expo, terra-rt, watchOS (SwiftUI), and Wear OS (Kotlin).
 
-**Demonstrates:** QR pairing, real-time BLE and phone-sensor streaming, background
-streaming, Apple Watch and Wear OS companion apps, and a demo mode that runs the full
-flow on synthetic data with no hardware.
-
-**Stack:** React Native (Expo) · terra-rt SDK · watchOS (SwiftUI) · Wear OS (Kotlin)
-
-```bash
-npm create tryterra-app -- --template streaming-mobile-app
-```
-
-The Terra RT SDK is a native module, so the app needs a development build (Expo Go is
-not supported), and pairing needs a physical phone. See the
-[template README](./packages/cli/templates/streaming-mobile-app/README.md) for details.
-
-### Terra Pulse
-
-`streaming-consumer-web-app` ([browse the template »](./packages/cli/templates/streaming-consumer-web-app))
-
-An example web app built on Terra's [Streaming API](https://docs.tryterra.co) that
-consumes real-time wearable data with no SDK. It opens a WebSocket to Terra's broker,
-authenticates as a consumer with a single-use developer token, and renders every
-reading on a live dashboard as it arrives.
-
-**Demonstrates:** consumer WebSocket connections, single-use developer tokens minted by
-a tiny backend (no API keys in the browser), the full connection lifecycle with
-jittered heartbeats, resilient reconnects with exponential backoff, and a live
-per-user, per-type dashboard.
-
-**Stack:** React 19 (Vite) · Recharts · a framework-free WebSocket client · Express token server
-
-```bash
-npm create tryterra-app -- --template streaming-consumer-web-app
-```
-
-### Terra Dispatch
-
-`vantage-web-app` – [browse the template »](./packages/cli/templates/vantage-web-app)
-
-A white-label diagnostics storefront and ops console built on Terra's
-[Vantage API](https://docs.tryterra.co/vantage-api-docs): customers order blood & DNA
-test kits from a shop, and an operator console tracks fulfilment and delivers FHIR
-results. Runs out of the box with zero credentials (demo mode on real captured sandbox
-data), or against the live Vantage sandbox with an API key.
-
-**Demonstrates:** catalog browse & curation, at-home and go-to-lab ordering (with
-draw-site lookup and address autocomplete), idempotent order creation, kit activation,
-signed webhooks with a verification inbox, FHIR result parsing, the results
-acknowledgment flow, escalations, and sandbox lifecycle simulation.
-
-**Stack:** React 19 · Hono · TanStack Router/Query · Drizzle (SQLite) · Tailwind v4
-
-```bash
-npm create tryterra-app -- --template vantage-web-app
-```
-
-### Terra Panel
-
-`lab-reports-web-app` – [browse the template »](./packages/cli/templates/lab-reports-web-app)
-
-A doctor-facing dashboard built on Terra's [Lab Reports API](https://docs.tryterra.co)
-joined with wearable data: upload any lab-report PDF, get standardized biomarkers back,
-and read them against the same patient's wearable history (the `reference_id` join).
-Runs out of the box with zero credentials (demo mode on bundled, fully synthetic sample
-data), or live against the Terra API with your keys.
-
-**Demonstrates:** lab-report upload and standardization, cross-report biomarker trends,
-the lab x wearable join, a patient timeline of draws over wearable lanes, deterministic
-domain scoring with explainable contributions, chronicity/trajectory vs each patient's
-own baseline, pre-draw context, AI wearable-signal insights with structured output, and
-retest-overdue triage.
-
-**Stack:** React 19 · Hono · TanStack Router/Query · Drizzle (SQLite) · Tailwind v4
-
-```bash
-npm create tryterra-app -- --template lab-reports-web-app
-```
-
-## Getting started
-
-Run the command above, pick an example, and name a directory when prompted. What to run
-next depends on the example; its README has the specifics. For Terra Basecamp:
-
-```bash
-cd my-app
-npm run setup   # provision infra and configure (guided, where supported)
-npm run dev     # start the dev server
-```
-
-For Terra Grip (a native mobile app):
-
-```bash
-cd my-app/app
+```sh
+terra examples init streaming-mobile-app my-grip-app
+cd my-grip-app/app
 npm install
 npx expo run:ios   # or: npx expo run:android
 ```
 
-Use any package manager – `npm`, `pnpm create tryterra-app`, `yarn create tryterra-app`,
-or `bun create tryterra-app`. The CLI installs dependencies with whichever you invoke.
+The Terra RT SDK is a native module and requires a development build; Expo Go is
+not supported. Pairing needs a physical phone. See the
+[app README](./examples/streaming-mobile-app/README.md) for native build tools,
+watch setup, and demo mode.
 
 ## Using with AI coding agents
 
-The CLI is fully non-interactive and self-documenting, so a coding agent can drive
-it end to end. Discover examples, then scaffold with machine-readable output:
+Discover examples and download one with machine-readable output:
 
-```bash
-# List examples as JSON
-npx --yes create-tryterra-app@latest --list --json
-
-# Scaffold non-interactively: JSON result on stdout, logs on stderr
-npx --yes create-tryterra-app@latest my-app --template unified-api-web-app --yes --json
+```sh
+terra examples list --format json
+terra examples init unified-api-web-app my-app --format json
 ```
 
-`--yes` skips every prompt, `--json` keeps stdout a clean JSON channel, and exit
-codes (`0` ok · `1` usage · `2` execution) tell the agent what happened. The
-leading `npx --yes` accepts npx's own install prompt. The paste-in prompt above
-is the quickest way to hand this to an agent; see [AGENTS.md](./AGENTS.md) for the
-full workflow, JSON shape, and deploy steps.
+These commands run without prompts. JSON goes to stdout and progress goes to
+stderr. A successful download returns `example`, absolute `path`, `source`, and
+`next_steps`. Each step names a working directory relative to the app and an
+instruction to follow. Read the app's README and AGENTS.md where present before
+running setup.
 
-Full CLI options live in [packages/cli](./packages/cli/README.md). Requires Node.js 20+.
+Use `terra examples --help` for commands and `terra examples init --help` for
+options. See [AGENTS.md](./AGENTS.md) for the agent workflow.
 
 ## Contributing
 
-Each example is mirrored from its own source repo. See
-[CONTRIBUTING.md](./CONTRIBUTING.md) for how examples are added and kept in sync.
+The root [examples.json](./examples.json) lists the apps in [examples/](./examples).
+Each app is mirrored from its own source repository. See
+[CONTRIBUTING.md](./CONTRIBUTING.md) for the catalog format and update process.
 
 ## Useful links
 

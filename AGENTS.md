@@ -28,5 +28,3 @@ requirements rather than web deployment steps.
 - Edit catalog metadata here. Adding an app requires a manifest entry and its
   mirrored folder in the same PR.
 - CI runs `npm run test:catalog` and `npm run validate:catalog`.
-- Follow MIGRATION.md for the coordinated Terra CLI release and npm package
-  deprecation.
