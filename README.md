@@ -67,6 +67,59 @@ not supported. Pairing needs a physical phone. See the
 [app README](./examples/streaming-mobile-app/README.md) for native build tools,
 watch setup, and demo mode.
 
+### Terra Pulse
+
+[`streaming-consumer-web-app`](./examples/streaming-consumer-web-app) consumes
+real-time wearable data over a WebSocket and displays readings on a live
+dashboard. An Express backend issues single-use tokens so API keys stay out
+of the browser.
+
+**Stack:** React, Vite, Recharts, and Express.
+
+```sh
+terra examples init streaming-consumer-web-app my-pulse-app
+cd my-pulse-app
+npm install
+```
+
+Follow the app README to configure `.env` with your Terra Dev ID and API key,
+then run `npm run dev`.
+
+### Terra Dispatch
+
+[`vantage-web-app`](./examples/vantage-web-app) provides a diagnostics
+storefront and operations console for ordering test kits, tracking fulfilment,
+and delivering results. Demo mode runs without credentials.
+
+**Stack:** React, Hono, TanStack Router/Query, and SQLite (Drizzle).
+
+```sh
+terra examples init vantage-web-app my-dispatch-app
+cd my-dispatch-app
+npm install
+npm run dev
+```
+
+Read the app README to configure live Vantage API access.
+
+### Terra Panel
+
+[`lab-reports-web-app`](./examples/lab-reports-web-app) combines standardized
+lab-report biomarkers with wearable history in a doctor-facing dashboard.
+It includes biomarker trends, patient timelines, and AI insights. Demo mode
+runs without credentials using bundled synthetic data.
+
+**Stack:** React, Hono, TanStack Router/Query, and SQLite (Drizzle).
+
+```sh
+terra examples init lab-reports-web-app my-panel-app
+cd my-panel-app
+npm install
+npm run dev
+```
+
+Read the app README to configure live Lab Reports API access.
+
 ## Using with AI coding agents
 
 Discover examples and download one with machine-readable output:

@@ -34,6 +34,9 @@ Apps are developed in their source repositories:
 
 - `unified-api-web-app`: `tryterra/unified-api-web-app`.
 - `streaming-mobile-app`: `tryterra/terra-grip`.
+- `streaming-consumer-web-app`: `tryterra/streaming-consumer-web-app`.
+- `vantage-web-app`: `tryterra/vantage-web-app`.
+- `lab-reports-web-app`: `tryterra/lab-reports-web-app`.
 
 Their release-triggered mirror workflows open PRs here. Update the source app,
 cut its release, review the resulting sync PR, and merge. Merging a validated

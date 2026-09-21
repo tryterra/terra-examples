@@ -44,6 +44,66 @@
           "instruction": "npx expo run:ios (or npx expo run:android)"
         }
       ]
+    },
+    {
+      "name": "streaming-consumer-web-app",
+      "title": "Terra Pulse",
+      "description": "A live wearable dashboard with a WebSocket consumer, React, Vite, and an Express token server.",
+      "path": "examples/streaming-consumer-web-app",
+      "next_steps": [
+        {
+          "directory": ".",
+          "instruction": "npm install"
+        },
+        {
+          "directory": ".",
+          "instruction": "Read README.md and configure .env with your Terra Dev ID and API key."
+        },
+        {
+          "directory": ".",
+          "instruction": "npm run dev"
+        }
+      ]
+    },
+    {
+      "name": "vantage-web-app",
+      "title": "Terra Dispatch",
+      "description": "A diagnostics storefront and operations console built with React, Hono, and SQLite.",
+      "path": "examples/vantage-web-app",
+      "next_steps": [
+        {
+          "directory": ".",
+          "instruction": "npm install"
+        },
+        {
+          "directory": ".",
+          "instruction": "Read README.md for demo mode and live API configuration."
+        },
+        {
+          "directory": ".",
+          "instruction": "npm run dev"
+        }
+      ]
+    },
+    {
+      "name": "lab-reports-web-app",
+      "title": "Terra Panel",
+      "description": "A lab-report and wearable dashboard with biomarker trends and AI insights.",
+      "path": "examples/lab-reports-web-app",
+      "next_steps": [
+        {
+          "directory": ".",
+          "instruction": "npm install"
+        },
+        {
+          "directory": ".",
+          "instruction": "Read README.md for demo mode and live API configuration."
+        },
+        {
+          "directory": ".",
+          "instruction": "npm run dev"
+        }
+      ]
     }
   ]
 }
