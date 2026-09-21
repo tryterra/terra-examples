@@ -4,5 +4,11 @@
   "private": true,
   "license": "Apache-2.0",
   "type": "module",
-  "workspaces": ["packages/*"]
+  "scripts": {
+    "validate:catalog": "node scripts/validate-catalog.mjs",
+    "test:catalog": "node --test scripts/validate-catalog.test.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0"
+  }
 }

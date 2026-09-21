@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "examples": [
+    {
+      "name": "unified-api-web-app",
+      "title": "Terra Basecamp",
+      "description": "A health dashboard and AI assistant built with React, Hono, Cloudflare Workers, and Neon.",
+      "path": "examples/unified-api-web-app",
+      "next_steps": [
+        {
+          "directory": ".",
+          "instruction": "npm install"
+        },
+        {
+          "directory": ".",
+          "instruction": "Read README.md and AGENTS.md to configure credentials and deployment."
+        },
+        {
+          "directory": ".",
+          "instruction": "npm run setup"
+        },
+        {
+          "directory": ".",
+          "instruction": "npm run dev"
+        }
+      ]
+    },
+    {
+      "name": "streaming-mobile-app",
+      "title": "Terra Grip",
+      "description": "Real-time wearable streaming with React Native, Expo, Apple Watch, and Wear OS.",
+      "path": "examples/streaming-mobile-app",
+      "next_steps": [
+        {
+          "directory": ".",
+          "instruction": "Read README.md for native build tools, physical-device requirements, and demo mode."
+        },
+        {
+          "directory": "app",
+          "instruction": "npm install"
+        },
+        {
+          "directory": "app",
+          "instruction": "npx expo run:ios (or npx expo run:android)"
+        }
+      ]
+    },
+    {
+      "name": "streaming-consumer-web-app",
+      "title": "Terra Pulse",
+      "description": "A live wearable dashboard with a WebSocket consumer, React, Vite, and an Express token server.",
+      "path": "examples/streaming-consumer-web-app",
+      "next_steps": [
+        {
+          "directory": ".",
+          "instruction": "npm install"
+        },
+        {
+          "directory": ".",
+          "instruction": "Read README.md and configure .env with your Terra Dev ID and API key."
+        },
+        {
+          "directory": ".",
+          "instruction": "npm run dev"
+        }
+      ]
+    },
+    {
+      "name": "vantage-web-app",
+      "title": "Terra Dispatch",
+      "description": "A diagnostics storefront and operations console built with React, Hono, and SQLite.",
+      "path": "examples/vantage-web-app",
+      "next_steps": [
+        {
+          "directory": ".",
+          "instruction": "npm install"
+        },
+        {
+          "directory": ".",
+          "instruction": "Read README.md for demo mode and live API configuration."
+        },
+        {
+          "directory": ".",
+          "instruction": "npm run dev"
+        }
+      ]
+    },
+    {
+      "name": "lab-reports-web-app",
+      "title": "Terra Panel",
+      "description": "A lab-report and wearable dashboard with biomarker trends and AI insights.",
+      "path": "examples/lab-reports-web-app",
+      "next_steps": [
+        {
+          "directory": ".",
+          "instruction": "npm install"
+        },
+        {
+          "directory": ".",
+          "instruction": "Read README.md for demo mode and live API configuration."
+        },
+        {
+          "directory": ".",
+          "instruction": "npm run dev"
+        }
+      ]
+    }
+  ]
+}
