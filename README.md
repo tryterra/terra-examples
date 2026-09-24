@@ -12,16 +12,24 @@ download it with the Terra CLI, and follow its setup guide to make it your own.
 
 ### 1. Install the Terra CLI
 
-**macOS with Homebrew:**
+Use the native installer (recommended). See [Terra CLI Docs](https://docs.tryterra.co/developer-tools/terra-cli/installation) for alternate installation methods.
+
+**macOS and Linux:**
 
 ```sh
-brew install tryterra/tap/terra
+curl -fsSL https://cli.tryterra.co/install.sh | sh
 ```
 
-**macOS, Linux, or Windows with npm** (requires Node.js 18+):
+**Windows PowerShell:**
+
+```powershell
+irm "https://cli.tryterra.co/install.ps1" | iex
+```
+
+Follow any PATH instructions printed by the installer, then check the installation:
 
 ```sh
-npm install -g @tryterra/cli
+terra version
 ```
 
 ### 2. Download an example
@@ -35,7 +43,7 @@ terra examples list
 Download an app into a new folder:
 
 ```sh
-terra examples init unified-api-web-app my-app
+terra examples clone unified-api-web-app my-app
 cd my-app
 ```
 
@@ -70,7 +78,7 @@ configuring services. Each app has its own credentials and runtime requirements.
 For a quick demo without credentials, choose **Terra Dispatch** or **Terra Panel**:
 
 ```sh
-terra examples init vantage-web-app my-demo
+terra examples clone vantage-web-app my-demo
 cd my-demo
 terra agent setup
 npm install
@@ -80,15 +88,15 @@ npm run dev
 ## Choose an example
 
 Each app name links to its setup guide. Use the **CLI name** with
-`terra examples init`.
+`terra examples clone`.
 
-| App | What it does | CLI name |
-| --- | --- | --- |
-| [Terra Basecamp](./examples/unified-api-web-app/README.md) | Connect wearables and health data to a dashboard with an AI assistant. | `unified-api-web-app` |
-| [Terra Grip](./examples/streaming-mobile-app/README.md) | Stream live sensor data from BLE devices, phones, and watches. | `streaming-mobile-app` |
-| [Terra Pulse](./examples/streaming-consumer-web-app/README.md) | Display real-time wearable readings on a WebSocket dashboard. | `streaming-consumer-web-app` |
-| [Terra Dispatch](./examples/vantage-web-app/README.md) | Order diagnostic test kits, track fulfilment, and deliver results. | `vantage-web-app` |
-| [Terra Panel](./examples/lab-reports-web-app/README.md) | Explore lab biomarkers, wearable history, and AI insights in a clinical dashboard. | `lab-reports-web-app` |
+| App                                                            | What it does                                                                       | CLI name                     |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------- |
+| [Terra Basecamp](./examples/unified-api-web-app/README.md)     | Connect wearables and health data to a dashboard with an AI assistant.             | `unified-api-web-app`        |
+| [Terra Grip](./examples/streaming-mobile-app/README.md)        | Stream live sensor data from BLE devices, phones, and watches.                     | `streaming-mobile-app`       |
+| [Terra Pulse](./examples/streaming-consumer-web-app/README.md) | Display real-time wearable readings on a WebSocket dashboard.                      | `streaming-consumer-web-app` |
+| [Terra Dispatch](./examples/vantage-web-app/README.md)         | Order diagnostic test kits, track fulfilment, and deliver results.                 | `vantage-web-app`            |
+| [Terra Panel](./examples/lab-reports-web-app/README.md)        | Explore lab biomarkers, wearable history, and AI insights in a clinical dashboard. | `lab-reports-web-app`        |
 
 ### Setup requirements
 
@@ -110,16 +118,16 @@ Add `--format json` for machine-readable output:
 
 ```sh
 terra examples list --format json
-terra examples init unified-api-web-app my-app --format json
+terra examples clone unified-api-web-app my-app --format json
 ```
 
 These commands run without prompts. JSON goes to stdout; progress goes to
-stderr. On success, `init` returns the example, absolute download path, source,
+stderr. On success, `clone` returns the example, absolute download path, source,
 and next steps with their working directories.
 
 See [AGENTS.md](./AGENTS.md) for the output contract and agent workflow.
 For command options, run `terra examples --help` or
-`terra examples init --help`.
+`terra examples clone --help`.
 
 ## Contributing
 

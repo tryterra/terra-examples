@@ -6,11 +6,11 @@ This repository publishes runnable Terra apps for `terra examples`.
 
 ```sh
 terra examples list --format json
-terra examples init unified-api-web-app my-app --format json
+terra examples clone unified-api-web-app my-app --format json
 ```
 
-`list` returns `{ "examples": [...] }`. Use an entry's `name` with `init`.
-`init` returns `example`, absolute `path`, `source`, and `next_steps`.
+`list` returns `{ "examples": [...] }`. Use an entry's `name` with `clone`.
+`clone` returns `example`, absolute `path`, `source`, and `next_steps`.
 Each next step has a `directory` relative to the app and an `instruction` to
 follow. Only trust stdout when the command exits successfully.
 
