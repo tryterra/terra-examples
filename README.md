@@ -75,7 +75,7 @@ The CLI prints the next steps after downloading. Read the downloaded
 `README.md` and `AGENTS.md` (if present) before installing dependencies or
 configuring services. Each app has its own credentials and runtime requirements.
 
-For a quick demo without credentials, choose **Terra Dispatch** or **Terra Panel**:
+For a quick demo without credentials, choose **Terra Dispatch**, **Terra Panel**, or **Terra Chart**:
 
 ```sh
 terra examples clone vantage-web-app my-demo
@@ -97,6 +97,7 @@ Each app name links to its setup guide. Use the **CLI name** with
 | [Terra Pulse](./examples/streaming-consumer-web-app/README.md) | Display real-time wearable readings on a WebSocket dashboard.                      | `streaming-consumer-web-app` |
 | [Terra Dispatch](./examples/vantage-web-app/README.md)         | Order diagnostic test kits, track fulfilment, and deliver results.                 | `vantage-web-app`            |
 | [Terra Panel](./examples/lab-reports-web-app/README.md)        | Explore lab biomarkers, wearable history, and AI insights in a clinical dashboard. | `lab-reports-web-app`        |
+| [Terra Chart](./examples/clinical-records-web-app/README.md)   | Read a user's Apple Health Records (raw FHIR) as a clean clinical dashboard.       | `clinical-records-web-app`   |
 
 ### Setup requirements
 
@@ -108,9 +109,9 @@ Each app name links to its setup guide. Use the **CLI name** with
   Pairing needs a physical phone. The setup guide covers watch apps and demo mode.
 - **Pulse:** React, Vite, Recharts, and Express. Requires a Terra Dev ID and API
   key in `.env`; the backend keeps the API key out of the browser.
-- **Dispatch and Panel:** React, Hono, TanStack Router/Query, and SQLite.
-  Both run in demo mode without credentials. Follow their setup guides to
-  connect live Vantage or Lab Reports APIs.
+- **Dispatch, Panel, and Chart:** React, Hono, TanStack Router/Query, and
+  SQLite. All three run in demo mode without credentials. Follow their setup
+  guides to connect live Vantage, Lab Reports, or clinical records APIs.
 
 ## Use with an AI coding agent
 

@@ -1,0 +1,9 @@
+node_modules
+dist
+.env
+*.local
+data/
+node_modules/.tmp
+samples/
+.tanstack/
+*.log

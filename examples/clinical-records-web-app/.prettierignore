@@ -1,0 +1,5 @@
+node_modules
+dist
+routeTree.gen.ts
+types.gen.ts
+package-lock.json

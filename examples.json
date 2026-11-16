@@ -104,6 +104,26 @@
           "instruction": "npm run dev"
         }
       ]
+    },
+    {
+      "name": "clinical-records-web-app",
+      "title": "Terra Chart",
+      "description": "An Apple Health Records dashboard that turns raw FHIR clinical records into readable cards.",
+      "path": "examples/clinical-records-web-app",
+      "next_steps": [
+        {
+          "directory": ".",
+          "instruction": "npm install"
+        },
+        {
+          "directory": ".",
+          "instruction": "Read README.md for demo mode and live API configuration."
+        },
+        {
+          "directory": ".",
+          "instruction": "npm run dev"
+        }
+      ]
     }
   ]
 }
