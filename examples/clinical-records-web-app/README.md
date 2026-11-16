@@ -27,7 +27,7 @@ npm run dev
 ```
 
 With no credentials the app runs in **demo mode** at http://localhost:5173:
-two sample users, one with 17 synthetic Apple Health Records from two health
+two sample users, one with 22 synthetic Apple Health Records from two health
 systems (DSTU2 and R4), one with none (the empty state). Syncing is disabled
 behind a visible banner.
 
@@ -48,13 +48,16 @@ behind a visible banner.
 
 ## What to look at
 
-- **User dashboard** - record counts per clinical type (with flagged counts),
-  then one section per type with a card per record: headline value, flag,
-  status, the clinically relevant date, details, the health system it came
-  from, and a **View raw FHIR** disclosure.
-- **Lab results and vitals** - value and unit, reference range, effective
-  date, interpretation flag (or a flag derived from the range when the health
-  system sent none), blood pressure collapsed to systolic/diastolic.
+- **User dashboard** - a header naming the health systems once, then one
+  section per clinical type with a single card of rows. Rows carry only what
+  a clinician scans for; clicking one opens a drawer with every parsed field,
+  the source health system, the FHIR resource type and release, and the raw
+  FHIR. Open a record directly with `?record=<record_id>`.
+- **Lab results and vitals** - value with a pretty-printed unit (`Cel` ->
+  `°C`, `10*3/uL` -> `×10³/µL`), reference range, and a flag only when
+  abnormal (or derived from the range when the health system sent none).
+  Repeated tests collapse into one row with a trend, panels such as a CBC
+  expand to their members, and blood pressure reads as systolic/diastolic.
 - **Conditions, medications, allergies** - onset and clinical status;
   medication name and dosage across MedicationStatement, MedicationOrder
   (DSTU2), and MedicationRequest (R4); allergy substance, reaction, severity,

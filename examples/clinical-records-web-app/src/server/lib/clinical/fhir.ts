@@ -9,6 +9,7 @@
  * `parsed: false` so the UI can say so.
  */
 import type { ClinicalRecord } from "./types";
+import { prettyUnit, type PrettyUnitOptions } from "./units";
 
 export type FlagTone = "high" | "low" | "abnormal" | "normal";
 
@@ -24,14 +25,43 @@ export interface RecordDetail {
   value: string;
 }
 
+/** A value split for display: the number and its (pretty) unit. */
+export interface SummaryQuantity {
+  /** Display value with any comparator, e.g. "6.1", "<0.04", "128/82". */
+  value: string;
+  unit: string | null;
+  /** Plottable number (systolic for blood pressure), when there is one. */
+  numeric: number | null;
+}
+
+/** One member of a panel observation (e.g. a CBC's leukocyte count). */
+export interface RecordComponent {
+  title: string;
+  value: string | null;
+  quantity: SummaryQuantity | null;
+  range: string | null;
+  flag: RecordFlag | null;
+}
+
 export interface RecordSummary {
   title: string;
+  /**
+   * Stable identity of what was measured or recorded (LOINC/SNOMED/RxNorm
+   * code when present, else the lowercased title). Repeated tests share it.
+   */
+  code: string | null;
   /** The clinically meaningful date (ISO 8601 or partial date), if any. */
   date: string | null;
   /** What `date` means: "Effective", "Onset", "Started", "Performed"... */
   dateLabel: string;
   /** Headline value, e.g. "6.1 %", "128/82 mmHg", "500 mg twice daily". */
   value: string | null;
+  /** `value` split into number + unit, for quantitative results. */
+  quantity: SummaryQuantity | null;
+  /** Reference range as text, e.g. "4-5.6 %", "<100 mg/dL". */
+  range: string | null;
+  /** Panel members; empty for single results and non-observations. */
+  components: RecordComponent[];
   flag: RecordFlag | null;
   status: string | null;
   details: RecordDetail[];
@@ -90,20 +120,60 @@ function humanize(s: string): string {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
+/** "Vital Signs" / "vital-signs" / "LABORATORY" -> "Vital signs", "Laboratory". */
+function sentenceCase(s: string): string {
+  const spaced = s.replace(/[-_]/g, " ").trim().toLowerCase();
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
+
+function categoryText(v: unknown): string | undefined {
+  const names = arr(v)
+    .map(conceptText)
+    .filter((x): x is string => Boolean(x))
+    .map(sentenceCase);
+  return [...new Set(names)].join(", ") || undefined;
+}
+
+/** Preferred code of a CodeableConcept: LOINC, then SNOMED, then any. */
+function primaryCode(v: unknown): string | undefined {
+  const codings = arr(obj(v)?.coding).map(obj).filter(Boolean) as Json[];
+  const pick = (re: RegExp) =>
+    codings.find((c) => re.test(str(c.system) ?? "") && str(c.code));
+  const c =
+    pick(/loinc/i) ?? pick(/snomed/i) ?? codings.find((x) => str(x.code));
+  return c ? `${str(c.system) ?? ""}|${str(c.code)}` : undefined;
+}
+
 function formatNumber(n: number): string {
   // Keep the precision the lab reported; just drop float noise.
   return String(Number(n.toPrecision(12)));
 }
 
-/** Quantity to "6.1 %" / "142 mg/dL". UCUM `{...}` annotations are dropped. */
-export function quantityText(v: unknown): string | undefined {
+/** Quantity split for display; units are pretty-printed UCUM. */
+export function readQuantity(
+  v: unknown,
+  opts?: PrettyUnitOptions,
+): SummaryQuantity | undefined {
   const q = obj(v);
   const value = num(q?.value);
   if (!q || value === undefined) return undefined;
   const comparator = str(q.comparator) ?? "";
-  const unit = str(q.unit) ?? str(q.code);
-  const cleanUnit = unit && !/^\{.*\}$/.test(unit) ? unit : undefined;
-  return `${comparator}${formatNumber(value)}${cleanUnit ? ` ${cleanUnit}` : ""}`;
+  // UCUM `code` is more reliable than free-text `unit` for formatting.
+  const unit = prettyUnit(str(q.code) ?? str(q.unit), opts);
+  return { value: `${comparator}${formatNumber(value)}`, unit, numeric: value };
+}
+
+function joinQuantity(q: SummaryQuantity): string {
+  return `${q.value}${q.unit ? ` ${q.unit}` : ""}`;
+}
+
+/** Quantity to "6.1 %" / "142 mg/dL" / "37.6 °C". */
+export function quantityText(
+  v: unknown,
+  opts?: PrettyUnitOptions,
+): string | undefined {
+  const q = readQuantity(v, opts);
+  return q ? joinQuantity(q) : undefined;
 }
 
 function periodStart(v: unknown): string | undefined {
@@ -189,8 +259,10 @@ function rangeText(v: unknown): string | undefined {
   const high = obj(r.high);
   const lowV = num(low?.value);
   const highV = num(high?.value);
-  const unit = str(high?.unit) ?? str(low?.unit);
-  const u = unit && !/^\{.*\}$/.test(unit) ? ` ${unit}` : "";
+  const unit = prettyUnit(
+    str(high?.code) ?? str(high?.unit) ?? str(low?.code) ?? str(low?.unit),
+  );
+  const u = unit ? ` ${unit}` : "";
   if (lowV !== undefined && highV !== undefined)
     return `${formatNumber(lowV)}-${formatNumber(highV)}${u}`;
   if (highV !== undefined) return `<${formatNumber(highV)}${u}`;
@@ -210,9 +282,12 @@ function flagFromRange(obs: Json): RecordFlag | null {
   return null;
 }
 
-function observationValue(o: Json): string | undefined {
+function observationValue(
+  o: Json,
+  opts?: PrettyUnitOptions,
+): string | undefined {
   return (
-    quantityText(o.valueQuantity) ??
+    quantityText(o.valueQuantity, opts) ??
     conceptText(o.valueCodeableConcept) ??
     str(o.valueString) ??
     (typeof o.valueBoolean === "boolean"
@@ -224,6 +299,7 @@ function observationValue(o: Json): string | undefined {
   );
 }
 
+const HEART_RATE = new Set(["8867-4", "364075005", "78564009"]);
 const SYSTOLIC = new Set(["8480-6", "271649006"]);
 const DIASTOLIC = new Set(["8462-4", "271650006"]);
 
@@ -233,12 +309,31 @@ function codes(concept: unknown): string[] {
     .filter((c): c is string => Boolean(c));
 }
 
-function parseObservation(o: Json): Omit<RecordSummary, "title" | "parsed"> & {
+type ParsedSummary = Omit<
+  RecordSummary,
+  "title" | "parsed" | "code" | "quantity" | "range" | "components"
+> & {
   title?: string;
-} {
+  code?: string;
+  quantity?: SummaryQuantity;
+  range?: string;
+  components?: RecordComponent[];
+};
+
+function isHeartRate(concept: unknown): boolean {
+  return (
+    codes(concept).some((c) => HEART_RATE.has(c)) ||
+    /heart rate|pulse/i.test(conceptText(concept) ?? "")
+  );
+}
+
+function parseObservation(o: Json): ParsedSummary {
   const details: RecordDetail[] = [];
   const components = arr(o.component).map(obj).filter(Boolean) as Json[];
-  let value = observationValue(o);
+  const unitOpts = { heartRate: isHeartRate(o.code) };
+  let value = observationValue(o, unitOpts);
+  let quantity = readQuantity(o.valueQuantity, unitOpts);
+  const parts: RecordComponent[] = [];
 
   // Blood pressure: systolic/diastolic arrive as components, no top value.
   const sys = components.find((c) =>
@@ -250,25 +345,42 @@ function parseObservation(o: Json): Omit<RecordSummary, "title" | "parsed"> & {
   const sysV = num(obj(sys?.valueQuantity)?.value);
   const diaV = num(obj(dia?.valueQuantity)?.value);
   if (!value && sysV !== undefined && diaV !== undefined) {
-    const unit = str(obj(sys?.valueQuantity)?.unit) ?? "mmHg";
-    value = `${formatNumber(sysV)}/${formatNumber(diaV)} ${unit}`;
+    const sq = obj(sys?.valueQuantity);
+    const unit = prettyUnit(str(sq?.code) ?? str(sq?.unit)) ?? "mmHg";
+    quantity = {
+      value: `${formatNumber(sysV)}/${formatNumber(diaV)}`,
+      unit,
+      numeric: sysV,
+    };
+    value = joinQuantity(quantity);
   } else {
     for (const c of components) {
-      push(details, conceptText(c.code) ?? "Component", observationValue(c));
+      const opts = { heartRate: isHeartRate(c.code) };
+      const title = conceptText(c.code) ?? "Component";
+      const cValue = observationValue(c, opts);
+      push(details, title, cValue);
+      parts.push({
+        title,
+        value: cValue ?? null,
+        quantity: readQuantity(c.valueQuantity, opts) ?? null,
+        range: rangeText(c.referenceRange) ?? null,
+        flag: readInterpretation(c.interpretation) ?? flagFromRange(c),
+      });
     }
   }
 
-  push(details, "Reference range", rangeText(o.referenceRange));
-  push(
-    details,
-    "Category",
-    arr(o.category).map(conceptText).filter(Boolean).join(", ") || undefined,
-  );
+  const range = rangeText(o.referenceRange);
+  push(details, "Reference range", range);
+  push(details, "Category", categoryText(o.category));
   push(details, "Performer", referenceText(arr(o.performer)[0]));
   push(details, "Note", str(o.comments) ?? str(obj(arr(o.note)[0])?.text));
 
   return {
     title: conceptText(o.code),
+    code: primaryCode(o.code),
+    quantity,
+    range,
+    components: parts,
     date: choiceDate(o, "effective") ?? str(o.issued) ?? null,
     dateLabel: "Effective",
     value: value ?? null,
@@ -294,15 +406,12 @@ function parseCondition(c: Json) {
   push(details, "Resolved", abatement);
   push(details, "Verification", statusText(c.verificationStatus));
   push(details, "Severity", conceptText(c.severity));
-  push(
-    details,
-    "Category",
-    arr(c.category).map(conceptText).filter(Boolean).join(", ") || undefined,
-  );
+  push(details, "Category", categoryText(c.category));
   // DSTU2 `dateRecorded`, R4 `recordedDate`.
   push(details, "Recorded", str(c.dateRecorded) ?? str(c.recordedDate));
   return {
     title: conceptText(c.code),
+    code: primaryCode(c.code),
     date:
       onset && !onset.startsWith("Age")
         ? onset
@@ -394,6 +503,7 @@ function parseMedication(m: Json, resourceType: string) {
 
   return {
     title,
+    code: primaryCode(m.medicationCodeableConcept),
     date: date ?? null,
     dateLabel,
     value: dosage || null,
@@ -446,6 +556,7 @@ function parseAllergy(a: Json) {
   return {
     // DSTU2 `substance`, R4 `code`.
     title: conceptText(a.substance) ?? conceptText(a.code),
+    code: primaryCode(a.substance) ?? primaryCode(a.code),
     date: choiceDate(a, "onset") ?? str(a.recordedDate) ?? null,
     dateLabel: choiceDate(a, "onset") ? "Onset" : "Recorded",
     value: manifestations.length
@@ -493,6 +604,7 @@ function parseProcedure(p: Json) {
   push(details, "Ended", periodEnd(p.performedPeriod));
   return {
     title: conceptText(p.code),
+    code: primaryCode(p.code),
     date: choiceDate(p, "performed") ?? null,
     dateLabel: "Performed",
     value: null,
@@ -518,6 +630,7 @@ function parseImmunization(i: Json) {
   const notGiven = i.wasNotGiven === true || str(i.status) === "not-done";
   return {
     title: conceptText(i.vaccineCode),
+    code: primaryCode(i.vaccineCode),
     date: str(i.date) ?? choiceDate(i, "occurrence") ?? null,
     dateLabel: "Administered",
     value: null,
@@ -554,14 +667,19 @@ function fallback(
     push(
       details,
       "Category",
-      conceptText(resource.type) ?? conceptText(arr(resource.category)[0]),
+      conceptText(resource.type) ?? categoryText(arr(resource.category)[0]),
     );
     push(details, "Payor", referenceText(arr(resource.payor)[0]));
     push(details, "Subscriber ID", str(resource.subscriberId));
     push(details, "Author", referenceText(arr(resource.author)[0]));
   }
+  const title = record.display_name || record.fhir.resource_type;
   return {
-    title: record.display_name || record.fhir.resource_type,
+    title,
+    code: (resource && primaryCode(resource.type)) ?? title.toLowerCase(),
+    quantity: null,
+    range: null,
+    components: [],
     date:
       (resource && genericDate(resource)) ??
       record.downloaded_at ??
@@ -584,7 +702,7 @@ export function summarizeRecord(record: ClinicalRecord): RecordSummary {
   if (!resource) return fallback(record, null);
 
   const type = str(resource.resourceType) ?? record.fhir.resource_type;
-  let partial: ReturnType<typeof parseObservation> | undefined;
+  let partial: ParsedSummary | undefined;
   try {
     switch (type) {
       case "Observation":
@@ -615,9 +733,14 @@ export function summarizeRecord(record: ClinicalRecord): RecordSummary {
   if (!partial) return fallback(record, resource);
 
   const date = partial.date ?? record.downloaded_at ?? null;
+  const title = partial.title ?? record.display_name ?? type;
   return {
     ...partial,
-    title: partial.title ?? record.display_name ?? type,
+    title,
+    code: partial.code ?? title.toLowerCase(),
+    quantity: partial.quantity ?? null,
+    range: partial.range ?? null,
+    components: partial.components ?? [],
     date,
     // The headline date already shows this one; don't repeat it as a detail.
     details: partial.details.filter(

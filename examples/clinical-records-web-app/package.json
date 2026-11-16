@@ -1,6 +1,6 @@
 {
   "name": "clinical-records-web-app",
-  "description": "Terra Chart: a clinician-style dashboard that turns a Terra user's Apple Health Records (raw FHIR clinical records) into readable cards. Runs in demo mode with zero credentials.",
+  "description": "Terra Chart: a clinician-style dashboard that turns a Terra user's Apple Health Records (raw FHIR clinical records) into readable rows. Runs in demo mode with zero credentials.",
   "private": true,
   "type": "module",
   "scripts": {

@@ -166,6 +166,135 @@ function dstu2Lab(
   };
 }
 
+/** DSTU2 CBC: a panel whose results arrive as components, no top value. */
+function cbcPanel() {
+  const ucum = "http://unitsofmeasure.org";
+  const part = (
+    loinc: string,
+    display: string,
+    value: number,
+    unit: string,
+    low: number,
+    high: number,
+    flag?: "L" | "H",
+  ) => ({
+    code: { coding: [{ system: LOINC, code: loinc, display }] },
+    valueQuantity: { value, unit, system: ucum, code: unit },
+    ...(flag
+      ? {
+          interpretation: {
+            coding: [{ system: V2_0078, code: flag }],
+          },
+        }
+      : {}),
+    referenceRange: [
+      {
+        low: { value: low, unit, system: ucum, code: unit },
+        high: { value: high, unit, system: ucum, code: unit },
+      },
+    ],
+  });
+  return {
+    resourceType: "Observation",
+    id: "eLb.CBC.20261103",
+    status: "final",
+    category: {
+      coding: [
+        {
+          system: "http://hl7.org/fhir/observation-category",
+          code: "laboratory",
+          display: "Laboratory",
+        },
+      ],
+      text: "Laboratory",
+    },
+    code: {
+      coding: [
+        {
+          system: LOINC,
+          code: "58410-2",
+          display: "CBC panel - Blood by Automated count",
+        },
+      ],
+      text: "CBC panel - Blood by Automated count",
+    },
+    subject: PATIENT_REF,
+    effectiveDateTime: "2026-11-03T08:15:00-08:00",
+    component: [
+      part(
+        "6690-2",
+        "Leukocytes [#/volume] in Blood by Automated count",
+        7.2,
+        "10*3/uL",
+        4.5,
+        11,
+      ),
+      part(
+        "789-8",
+        "Erythrocytes [#/volume] in Blood by Automated count",
+        4.1,
+        "10*6/uL",
+        4.2,
+        5.9,
+        "L",
+      ),
+      part(
+        "718-7",
+        "Hemoglobin [Mass/volume] in Blood",
+        13.9,
+        "g/dL",
+        13.5,
+        17.5,
+      ),
+      part(
+        "777-3",
+        "Platelets [#/volume] in Blood by Automated count",
+        251,
+        "10*3/uL",
+        150,
+        400,
+      ),
+    ],
+    performer: [{ display: "Larkspur Reference Laboratory" }],
+  };
+}
+
+/** R4 vital sign with a single UCUM quantity. */
+function r4Vital(
+  id: string,
+  loinc: string,
+  display: string,
+  value: number,
+  ucum: string,
+) {
+  return {
+    resourceType: "Observation",
+    id,
+    status: "final",
+    category: [
+      {
+        coding: [
+          {
+            system:
+              "http://terminology.hl7.org/CodeSystem/observation-category",
+            code: "vital-signs",
+            display: "Vital Signs",
+          },
+        ],
+      },
+    ],
+    code: { coding: [{ system: LOINC, code: loinc, display }], text: display },
+    subject: { reference: "Patient/nb-55210" },
+    effectiveDateTime: "2026-10-21T10:30:00-07:00",
+    valueQuantity: {
+      value,
+      unit: ucum,
+      system: "http://unitsofmeasure.org",
+      code: ucum,
+    },
+  };
+}
+
 const R1 = "2026-11-09T18:42:10Z";
 const R2 = "2026-11-12T07:05:33Z";
 
@@ -671,5 +800,74 @@ export const DEMO_RECORDS: Record<string, ClinicalRecord[]> = {
       resourceType: "DocumentReference",
       id: "doc-77201",
     }),
+    record(
+      18,
+      LARKSPUR,
+      "lab_result",
+      "Hemoglobin A1c",
+      dstu2Lab(
+        "eLb.A1c.20251104",
+        "4548-4",
+        "Hemoglobin A1c/Hemoglobin.total in Blood",
+        6.0,
+        "%",
+        "2025-11-04T08:15:00-08:00",
+        { low: 4.0, high: 5.6 },
+        "H",
+      ),
+      { receivedAt: R1 },
+    ),
+    record(19, LARKSPUR, "lab_result", "CBC panel", cbcPanel(), {
+      receivedAt: R1,
+    }),
+    record(
+      20,
+      NORTHBAY,
+      "vital_sign",
+      "Body Temperature",
+      r4Vital("obs-temp-7732", "8310-5", "Body temperature", 37.6, "Cel"),
+      { receivedAt: R2 },
+    ),
+    record(
+      21,
+      NORTHBAY,
+      "vital_sign",
+      "BMI",
+      r4Vital("obs-bmi-7733", "39156-5", "Body mass index", 26.2, "kg/m2"),
+      { receivedAt: R2 },
+    ),
+    record(
+      22,
+      LARKSPUR,
+      "vital_sign",
+      "Pulse",
+      {
+        resourceType: "Observation",
+        id: "eVs.HR.20260512",
+        status: "final",
+        category: {
+          coding: [
+            {
+              system: "http://hl7.org/fhir/observation-category",
+              code: "vital-signs",
+            },
+          ],
+          text: "Vital Signs",
+        },
+        code: {
+          coding: [{ system: LOINC, code: "8867-4", display: "Heart rate" }],
+          text: "Pulse",
+        },
+        subject: PATIENT_REF,
+        effectiveDateTime: "2026-05-12T08:02:00-07:00",
+        valueQuantity: {
+          value: 74,
+          unit: "/min",
+          system: "http://unitsofmeasure.org",
+          code: "/min",
+        },
+      },
+      { receivedAt: R1 },
+    ),
   ],
 };

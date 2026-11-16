@@ -3,7 +3,7 @@
 Guidance for AI coding agents working with this example. It is a **worked
 reference for Terra's `clinical_record` data type**: Apple Health Records
 delivered as raw FHIR (DSTU2 or R4), backfilled through the pull API, kept
-fresh by webhooks, and rendered as readable cards.
+fresh by webhooks, and rendered as readable rows.
 
 Live API docs: https://docs.tryterra.co (append `.md` to any page for
 markdown).

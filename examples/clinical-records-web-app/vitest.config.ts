@@ -12,6 +12,6 @@ export default defineConfig({
     globals: true,
     restoreMocks: true,
     environment: "node",
-    include: ["src/server/**/*.test.ts"],
+    include: ["src/server/**/*.test.ts", "src/client/lib/**/*.test.ts"],
   },
 });

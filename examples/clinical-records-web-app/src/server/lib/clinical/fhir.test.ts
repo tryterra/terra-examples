@@ -132,6 +132,97 @@ describe("Observation", () => {
       ).value,
     ).toBe("Negative");
   });
+
+  it("splits value and pretty UCUM unit; bpm only for heart rate", () => {
+    const temp = summarizeRecord(
+      rec({
+        resourceType: "Observation",
+        code: { coding: [{ system: "http://loinc.org", code: "8310-5" }] },
+        valueQuantity: { value: 37.6, unit: "Cel", code: "Cel" },
+        category: [
+          { coding: [{ code: "vital-signs", display: "Vital Signs" }] },
+        ],
+      }),
+    );
+    expect(temp).toMatchObject({
+      value: "37.6 °C",
+      quantity: { value: "37.6", unit: "°C", numeric: 37.6 },
+      code: "http://loinc.org|8310-5",
+    });
+    expect(temp.details).toContainEqual({
+      label: "Category",
+      value: "Vital signs",
+    });
+    const hr = summarizeRecord(
+      rec({
+        resourceType: "Observation",
+        code: { coding: [{ code: "8867-4", display: "Heart rate" }] },
+        valueQuantity: { value: 77, unit: "/min" },
+      }),
+    );
+    expect(hr.quantity).toEqual({ value: "77", unit: "bpm", numeric: 77 });
+  });
+
+  it("blood pressure quantity plots the systolic value", () => {
+    const s = summarizeRecord(
+      rec({
+        resourceType: "Observation",
+        code: { text: "Blood Pressure" },
+        component: [
+          {
+            code: { coding: [{ code: "8480-6" }] },
+            valueQuantity: { value: 128, unit: "mmHg", code: "mm[Hg]" },
+          },
+          {
+            code: { coding: [{ code: "8462-4" }] },
+            valueQuantity: { value: 82, unit: "mmHg", code: "mm[Hg]" },
+          },
+        ],
+      }),
+    );
+    expect(s.quantity).toEqual({ value: "128/82", unit: "mmHg", numeric: 128 });
+    expect(s.components).toEqual([]);
+  });
+
+  it("panel components carry their own value, range, and flag", () => {
+    const s = summarizeRecord(
+      rec({
+        resourceType: "Observation",
+        code: { text: "CBC panel - Blood by Automated count" },
+        component: [
+          {
+            code: { text: "Leukocytes" },
+            valueQuantity: { value: 111, unit: "10*3/uL" },
+            referenceRange: [
+              { low: { value: 4.5, unit: "10*3/uL" }, high: { value: 11 } },
+            ],
+          },
+          {
+            code: { text: "Erythrocytes" },
+            valueQuantity: { value: 4.1, code: "10*6/uL" },
+            interpretation: [{ coding: [{ code: "L" }] }],
+          },
+        ],
+      }),
+    );
+    expect(s.value).toBeNull();
+    expect(s.components).toEqual([
+      {
+        title: "Leukocytes",
+        value: "111 ×10³/µL",
+        quantity: { value: "111", unit: "×10³/µL", numeric: 111 },
+        range: "4.5-11 ×10³/µL",
+        flag: { code: "H", label: "High", tone: "high" },
+      },
+      {
+        title: "Erythrocytes",
+        value: "4.1 ×10⁶/µL",
+        quantity: { value: "4.1", unit: "×10⁶/µL", numeric: 4.1 },
+        range: null,
+        flag: { code: "L", label: "Low", tone: "low" },
+      },
+    ]);
+  });
 });
 
 describe("Condition", () => {

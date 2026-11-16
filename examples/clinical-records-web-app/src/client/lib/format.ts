@@ -45,3 +45,26 @@ export function formatBytes(n: number): string {
   if (n < 1024) return `${n} B`;
   return `${(n / 1024).toFixed(1)} KB`;
 }
+
+/** "Sep 1992" for month or day precision, "1992" for year precision. */
+export function formatMonthYear(value: string | null | undefined): string {
+  if (!value) return "-";
+  if (/^\d{4}$/.test(value)) return value;
+  const d = /^\d{4}-\d{2}$/.test(value)
+    ? new Date(`${value}-01T00:00:00`)
+    : /^\d{4}-\d{2}-\d{2}$/.test(value)
+      ? new Date(`${value}T00:00:00`)
+      : new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    year: "numeric",
+  }).format(d);
+}
+
+/** "Larkspur Medical Group and Northbay Health", Oxford comma for 3+. */
+export function joinNames(names: string[]): string {
+  if (names.length <= 1) return names[0] ?? "";
+  if (names.length === 2) return `${names[0]} and ${names[1]}`;
+  return `${names.slice(0, -1).join(", ")}, and ${names.at(-1)}`;
+}

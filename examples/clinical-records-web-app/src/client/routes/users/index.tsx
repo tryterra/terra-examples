@@ -1,17 +1,17 @@
 import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CaretRightIcon, PlusIcon } from "@phosphor-icons/react";
+import { AppleLogoIcon, CaretRightIcon, PlusIcon } from "@phosphor-icons/react";
 import { Badge } from "../../components/shared/atoms/Badge";
 import { Button } from "../../components/shared/atoms/Button";
 import { Dialog, Heading } from "../../components/shared/atoms/Dialog";
 import { Form } from "../../components/shared/atoms/Form";
 import { GridList, GridListItem } from "../../components/shared/atoms/GridList";
 import { Modal } from "../../components/shared/atoms/Modal";
+import { SearchField } from "../../components/shared/atoms/SearchField";
 import { Skeleton } from "../../components/shared/atoms/Skeleton";
 import { TextField } from "../../components/shared/atoms/TextField";
 import { toastQueue } from "../../components/shared/atoms/Toast";
-import { EmptyState } from "../../components/shared/atoms/EmptyState";
 import { Meta } from "../../components/shared/Meta";
 import { api, unwrap } from "../../lib/api";
 import { healthQuery, usersQuery, type UserRow } from "../../lib/queries";
@@ -27,19 +27,19 @@ function UsersPage() {
   const healthQ = useQuery(healthQuery);
   const demo = healthQ.data?.demo === true;
   const [addOpen, setAddOpen] = useState(false);
-  const users = usersQ.data?.users ?? [];
+  const [search, setSearch] = useState("");
+  const all = usersQ.data?.users ?? [];
+  const q = search.trim().toLowerCase();
+  const users = q
+    ? all.filter((u) =>
+        `${u.referenceId ?? ""} ${u.userId}`.toLowerCase().includes(q),
+      )
+    : all;
 
   return (
     <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-6 py-12">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-semibold text-main-black">
-            Clinical records
-          </h1>
-          <p className="text-sm text-secondary-text">
-            Apple Health Records shared by your Terra users, as readable charts.
-          </p>
-        </div>
+        <h1 className="text-3xl font-semibold text-main-black">Users</h1>
         <Button
           variant="primary"
           className="shrink-0 whitespace-nowrap"
@@ -51,6 +51,14 @@ function UsersPage() {
         </Button>
       </div>
 
+      <SearchField
+        aria-label="Search users"
+        placeholder="Search by reference or user ID…"
+        value={search}
+        onChange={setSearch}
+        className="max-w-md"
+      />
+
       {usersQ.isLoading ? (
         <div className="flex flex-col gap-2">
           {[0, 1].map((i) => (
@@ -58,12 +66,15 @@ function UsersPage() {
           ))}
         </div>
       ) : usersQ.isError ? (
-        <EmptyState>Could not load users: {usersQ.error.message}</EmptyState>
+        <p className="text-sm text-subtle-text">
+          Could not load users: {usersQ.error.message}
+        </p>
       ) : users.length === 0 ? (
-        <EmptyState>
-          No users yet. Add a Terra user ID, or connect one through Apple Health
-          and let the auth webhook register them.
-        </EmptyState>
+        <p className="text-sm text-subtle-text">
+          {search
+            ? "No users match your search."
+            : "No users yet - add a Terra user ID, or connect one through Apple Health and let the auth webhook register them."}
+        </p>
       ) : (
         <GridList
           aria-label="Users"
@@ -96,24 +107,33 @@ function UserRowItem({ user: u }: { user: UserRow }) {
           <Meta label="User ID" mono>
             {u.userId}
           </Meta>
-          <Meta label="Provider">{u.provider}</Meta>
         </div>
       </div>
-      <div className="w-32 shrink-0">
+      {/* Fixed-width trailing columns so rows align regardless of content */}
+      <div className="w-28 shrink-0">
         <Meta label="Records">
           {u.records > 0 ? (
-            <Badge variant="emphasis">{u.records} records</Badge>
+            <span className="tabular-nums">{u.records}</span>
           ) : (
             <Badge variant="neutral">None yet</Badge>
           )}
         </Meta>
       </div>
       <div className="hidden w-32 shrink-0 sm:block">
-        <Meta label="Health systems">{u.sources}</Meta>
-      </div>
-      <div className="hidden w-36 shrink-0 md:block">
         <Meta label="Last received">
-          {formatRelativeTime(u.lastReceivedAt)}
+          {u.lastReceivedAt ? formatRelativeTime(u.lastReceivedAt) : "Never"}
+        </Meta>
+      </div>
+      <div className="hidden w-44 shrink-0 md:block">
+        <Meta label="Source">
+          {u.provider === "APPLE" ? (
+            <Badge variant="emphasis">
+              <AppleLogoIcon size={14} weight="fill" />
+              Apple Health
+            </Badge>
+          ) : (
+            <Badge variant="neutral">{u.provider}</Badge>
+          )}
         </Meta>
       </div>
       <CaretRightIcon size={20} className="shrink-0 text-subtle-text" />
